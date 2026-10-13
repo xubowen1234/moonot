@@ -9,7 +9,7 @@ MoonOT is a pure MoonBit library for regularized discrete optimal transport on f
 - Balanced entropy-regularized transport with log-domain scaling and equal total-mass validation (no implicit normalization).
 - KL-unbalanced transport with separate source/target marginal penalties, a product-reference coupling KL, and unequal input totals.
 - Debiased Sinkhorn divergence using explicit cross/source-self/target-self cost matrices.
-- Fixed-support regularized barycenters over a shared square cost matrix, with strictly positive internally normalized weights and an output total equal to the common input total.
+- Fixed-support regularized barycenters with either one shared square cost matrix or one square ground-cost matrix per measure; weights are strictly positive and normalized internally, and the output preserves the common input total.
 - Rectangular dense cost matrices, finite nonnegative masses/costs, and zero-support handling.
 - Optional pairwise squared-Euclidean, Euclidean, and Manhattan cost builders for finite point supports; callers can still provide costs from any domain-specific metric.
 - Balanced objective components and structured termination diagnostics; unbalanced objective components, marginal diagnostics, and log-scaling residual.
@@ -20,13 +20,36 @@ The balanced objective is
 
 with the entropy summand defined as zero when `P[i,j] = 0`.
 
-The balanced divergence subtracts half of each self-transport objective from the cross-transport objective. Its value is not promised nonnegative unless callers provide suitable mutually consistent ground costs. For common input total `M`, the fixed-support barycenter objective is `min_{x >= 0, sum(x) = M} sum_k lambda_k * OT_epsilon(x, a_k; C)`, where positive input weights are normalized to `lambda_k`. The result preserves `M` (it is a probability vector only when `M = 1`); input totals must agree within the documented relative tolerance. Entropic regularization can bias it away from the unregularized barycenter, even for a single measure. Its log-barycenter update residual determines outer convergence; the reported transport residual is diagnostic, and neither is an optimality-gap or bias bound. See [the numerical contract](docs/algorithm-contract.md) for exact equations, validation rules, termination semantics, and scope boundaries; see [the bounded duplication review](docs/competition/duplicate-check.md) for recorded ecosystem checks.
+The balanced divergence subtracts half of each self-transport objective from the cross-transport objective. Its value is not promised nonnegative unless callers provide suitable mutually consistent ground costs. For common input total `M`, the fixed-support barycenter objective is `min_{x >= 0, sum(x) = M} sum_k lambda_k * OT_epsilon(x, a_k; C_k)`. The legacy `regularized_barycenter` uses the same `C` for every measure; `regularized_barycenter_with_costs` accepts a distinct `C_k` for each one. In the latter API, each matrix row indexes the common barycenter support and its columns align with the paired measure. All matrices share the same row ordering and must be finite, nonnegative, and `n × n`; symmetry and metric properties are not required. Epsilon is shared, and matrices are not averaged or independently rescaled. Positive input weights are normalized to `lambda_k`. The result preserves `M` (it is a probability vector only when `M = 1`); input totals must agree within the documented relative tolerance. Entropic regularization can bias the result away from the unregularized barycenter. The log-barycenter update residual determines outer convergence; the reported transport residual is diagnostic, and neither is an optimality-gap or bias bound. See [the numerical contract](docs/algorithm-contract.md) for equations, validation rules, termination semantics, and scope boundaries; see [the bounded duplication review](docs/competition/duplicate-check.md) for recorded ecosystem checks.
 
 The KL-unbalanced objective is
 
 `<P, cost_weight*C> + epsilon*KL(P || a⊗b) + rho_source*KL(P1 || a) + rho_target*KL(Pᵀ1 || b)`,
 
 where `KL(x || y) = sum(x*log(x/y) - x + y)` with explicit zero-mass boundary conventions. See [the numerical contract](docs/algorithm-contract.md) for equations, input rules, convergence semantics, and scope boundaries; see [the bounded duplication review](docs/competition/duplicate-check.md) for recorded ecosystem checks.
+
+## Heterogeneous-cost barycenter
+
+Use `regularized_barycenter_with_costs` when each input distribution has its own matching geometry but all distributions map to one shared, fixed barycenter support. For example, independently calibrated domains can keep their own costs while contributing to one reference distribution:
+
+```moonbit
+let measures = [[1.0, 0.0], [0.0, 1.0]]
+let costs = [
+  [[0.0, 9.0], [2.0, 0.0]],
+  [[0.0, 4.0], [3.0, 0.0]],
+]
+match @moonot.regularized_barycenter_with_costs(
+  measures,
+  [1.0, 1.0],
+  costs,
+  { epsilon: 1.0, tolerance: 1.0e-10, max_iterations: 2000 },
+) {
+  Err(_) => println("invalid measure/cost set or solver configuration")
+  Ok(solution) => println(solution.barycenter)
+}
+```
+
+The cost-matrix index pairs with the measure index. Matrix rows use the common barycenter support ordering; columns use the paired measure ordering. This API does not optimize support locations, accept rectangular costs or infinite forbidden edges, learn costs, or provide a separate epsilon per measure. The shared-cost API remains available and stores a single kernel rather than expanding it into one copy per input.
 
 ## Point-cloud cost construction
 

@@ -4,6 +4,8 @@ All notable user-visible changes to MoonOT will be recorded here. Entries descri
 
 ## Unreleased
 
+- Added `regularized_barycenter_with_costs` for fixed-support balanced barycenters with one validated square ground-cost matrix per measure, with per-matrix log-domain kernels and original-cost objective evaluation; the shared-cost API remains unchanged.
+
 - Added opt-in balanced Sinkhorn continuation with opaque cost-unit dual-potential seeds, preserving the existing `SinkhornResult` shape and reporting ordinary convergence diagnostics for each solve.
 - Added validated dense-coupling diagnostics for row/column marginals and unregularized transport cost, with shape, numeric-domain, and overflow errors.
 - Added conditional barycentric projection from coupling rows to finite target feature vectors, with explicit zero-mass-row and shape errors.

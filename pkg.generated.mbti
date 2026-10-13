@@ -20,6 +20,8 @@ pub fn manhattan_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Resu
 
 pub fn regularized_barycenter(Array[Array[Double]], Array[Double], Array[Array[Double]], SinkhornOptions) -> Result[BarycenterResult, BarycenterError]
 
+pub fn regularized_barycenter_with_costs(Array[Array[Double]], Array[Double], Array[Array[Array[Double]]], SinkhornOptions) -> Result[BarycenterResult, BarycenterCostsError]
+
 pub fn squared_euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
 
 pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError]
@@ -27,6 +29,17 @@ pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], U
 // Errors
 
 // Types and methods
+pub(all) enum BarycenterCostsError {
+  InputError(BarycenterError)
+  CostCountMismatch
+  CostRowCountMismatch(Int)
+  CostColumnCountMismatch(Int, Int)
+  NonFiniteCost(Int, Int, Int)
+  NegativeCost(Int, Int, Int)
+  SolverError(Int, SinkhornError)
+  NumericalFailure
+}
+
 pub(all) enum BarycenterError {
   EmptyMeasures
   WeightCountMismatch
