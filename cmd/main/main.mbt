@@ -90,6 +90,8 @@ fn report_solver_error(error : @moonot.SinkhornError) -> Unit {
       println("ERROR: tolerance must be finite and positive")
     @moonot.SinkhornError::InvalidIterationLimit =>
       println("ERROR: maximum iterations must be positive")
+    @moonot.SinkhornError::InvalidWarmStart =>
+      println("ERROR: warm-start potential dimensions or values are invalid")
     @moonot.SinkhornError::NumericalFailure =>
       println("ERROR: the solver encountered a numerical failure")
   }

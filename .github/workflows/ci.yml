@@ -63,5 +63,5 @@ jobs:
           moon run --target ${{ matrix.target }} examples/fixed-support-barycenter
           moon run --target ${{ matrix.target }} cmd/main
           moon run --target ${{ matrix.target }} examples/point-cloud-transport
-          moon run --target ${{ matrix.target }} examples/point-cloud-transport
+          moon run --target ${{ matrix.target }} examples/epsilon-scaling
 

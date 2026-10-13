@@ -79,6 +79,37 @@ match result {
 }
 ```
 
+## Balanced warm starts
+
+For a sequence of related balanced problems, retain the opaque dual-potential seed from one solve and pass it to the next. The seed is expressed in cost units and may be reused at another epsilon; the new solve still applies its own tolerance and iteration limit. Warm starts can reduce iterations for nearby problems, but do not guarantee a speedup for every input:
+
+```moonbit
+match @moonot.balanced_sinkhorn_with_warm_start(
+  source,
+  target_at_coarse_epsilon,
+  cost,
+  { epsilon: 2.0, tolerance: 1.0e-9, max_iterations: 2000 },
+  None,
+) {
+  Err(_) => println("transport solve failed")
+  Ok((coarse, seed)) => {
+    println(coarse.iterations)
+    match @moonot.balanced_sinkhorn_with_warm_start(
+      source,
+      target_at_fine_epsilon,
+      cost,
+      { epsilon: 0.5, tolerance: 1.0e-9, max_iterations: 2000 },
+      Some(seed),
+    ) {
+      Err(_) => println("transport solve failed")
+      Ok((fine, _)) => println(fine.iterations)
+    }
+  }
+}
+```
+
+`SinkhornResult` remains the common diagnostics type; the opt-in API returns it together with an opaque seed so callers that do not use warm starts keep the ordinary result shape.
+
 ## Runnable workflow examples
 
 Each example is a real MoonBit executable package:
@@ -90,6 +121,7 @@ moon run examples/color-histogram
 moon run examples/divisible-allocation
 moon run examples/unbalanced-observations
 moon run examples/fixed-support-barycenter
+moon run examples/epsilon-scaling
 ```
 
 They demonstrate coordinate-derived point-cloud costs, distribution reweighting, caller-prepared color histograms, divisible supply allocation, asymmetric missing/extra observation mass, and fixed-support weighted histogram aggregation. Image decoding, machine-learning estimators, and integer optimization remain the caller's responsibility.

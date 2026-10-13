@@ -4,6 +4,7 @@ All notable user-visible changes to MoonOT will be recorded here. Entries descri
 
 ## Unreleased
 
+- Added opt-in balanced Sinkhorn continuation with opaque cost-unit dual-potential seeds, preserving the existing `SinkhornResult` shape and reporting ordinary convergence diagnostics for each solve.
 - Added validated dense-coupling diagnostics for row/column marginals and unregularized transport cost, with shape, numeric-domain, and overflow errors.
 - Added conditional barycentric projection from coupling rows to finite target feature vectors, with explicit zero-mass-row and shape errors.
 - Exposed balanced transport-cost and entropy-regularizer components alongside the combined objective, with analytic accounting tests.

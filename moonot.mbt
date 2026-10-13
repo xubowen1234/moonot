@@ -15,6 +15,16 @@ pub(all) struct SinkhornOptions {
 }
 
 ///|
+/// Opaque dual-potential seed returned by a balanced solve.
+///
+/// It can initialize another solve with compatible support dimensions. Values
+/// are expressed in cost units, so they can be reused with a different epsilon.
+pub struct SinkhornWarmStart {
+  source_potential : Array[Double]
+  target_potential : Array[Double]
+}
+
+///|
 /// A transport plan and diagnostics for the regularized problem
 /// `<P, C> + epsilon * sum(P * (log(P) - 1))`.
 pub(all) struct SinkhornResult {
@@ -45,6 +55,7 @@ pub(all) enum SinkhornError {
   InvalidEpsilon
   InvalidTolerance
   InvalidIterationLimit
+  InvalidWarmStart
   NumericalFailure
 }
 
@@ -61,6 +72,42 @@ pub fn balanced_sinkhorn(
   cost : Array[Array[Double]],
   options : SinkhornOptions,
 ) -> Result[SinkhornResult, SinkhornError] {
+  match balanced_sinkhorn_internal(source, target, cost, options, None, false) {
+    Err(error) => Err(error)
+    Ok((result, _)) => Ok(result)
+  }
+}
+
+///|
+/// Solve balanced transport using a prior solve's opaque dual-potential seed.
+///
+/// Returns both the ordinary diagnostics and a seed for another solve. A warm
+/// start only changes the initial iterate; the requested tolerance, iteration
+/// limit, and termination checks still apply to the new problem.
+pub fn balanced_sinkhorn_with_warm_start(
+  source : Array[Double],
+  target : Array[Double],
+  cost : Array[Array[Double]],
+  options : SinkhornOptions,
+  warm_start : SinkhornWarmStart?,
+) -> Result[(SinkhornResult, SinkhornWarmStart), SinkhornError] {
+  match
+    balanced_sinkhorn_internal(source, target, cost, options, warm_start, true) {
+    Err(error) => Err(error)
+    Ok((result, Some(seed))) => Ok((result, seed))
+    Ok(_) => Err(SinkhornError::NumericalFailure)
+  }
+}
+
+///|
+fn balanced_sinkhorn_internal(
+  source : Array[Double],
+  target : Array[Double],
+  cost : Array[Array[Double]],
+  options : SinkhornOptions,
+  warm_start : SinkhornWarmStart?,
+  capture_warm_start : Bool,
+) -> Result[(SinkhornResult, SinkhornWarmStart?), SinkhornError] {
   let rows = source.length()
   let columns = target.length()
   if rows == 0 {
@@ -137,12 +184,32 @@ pub fn balanced_sinkhorn(
     }
   }
 
+  match warm_start {
+    None => ()
+    Some(seed) => {
+      if seed.source_potential.length() != rows ||
+        seed.target_potential.length() != columns {
+        return Err(SinkhornError::InvalidWarmStart)
+      }
+      for i in 0..<rows {
+        if !is_finite(seed.source_potential[i]) {
+          return Err(SinkhornError::InvalidWarmStart)
+        }
+      }
+      for j in 0..<columns {
+        if !is_finite(seed.target_potential[j]) {
+          return Err(SinkhornError::InvalidWarmStart)
+        }
+      }
+    }
+  }
+
   let zero_plan : Array[Array[Double]] = []
   for _ in 0..<rows {
     zero_plan.push(Array::make(columns, 0.0))
   }
   if source_total == 0.0 && target_total == 0.0 {
-    return Ok({
+    let result : SinkhornResult = {
       coupling: zero_plan,
       transport_cost: 0.0,
       entropy_regularizer: 0.0,
@@ -150,7 +217,16 @@ pub fn balanced_sinkhorn(
       marginal_residual: 0.0,
       iterations: 0,
       termination: SinkhornTermination::Converged,
-    })
+    }
+    let seed : SinkhornWarmStart? = if capture_warm_start {
+      Some({
+        source_potential: Array::make(rows, 0.0),
+        target_potential: Array::make(columns, 0.0),
+      })
+    } else {
+      None
+    }
+    return Ok((result, seed))
   }
 
   let mut minimum_cost = 0.0
@@ -200,6 +276,27 @@ pub fn balanced_sinkhorn(
   }
   let log_u = Array::make(rows, 0.0)
   let log_v = Array::make(columns, 0.0)
+  match warm_start {
+    None => ()
+    Some(seed) => {
+      for i in 0..<rows {
+        if source[i] > 0.0 {
+          log_u[i] = (seed.source_potential[i] - minimum_cost) / options.epsilon
+          if !is_finite(log_u[i]) {
+            return Err(SinkhornError::NumericalFailure)
+          }
+        }
+      }
+      for j in 0..<columns {
+        if target[j] > 0.0 {
+          log_v[j] = seed.target_potential[j] / options.epsilon
+          if !is_finite(log_v[j]) {
+            return Err(SinkhornError::NumericalFailure)
+          }
+        }
+      }
+    }
+  }
   let mut coupling = zero_plan
   let mut residual = 0.0
   let mut iterations = 0
@@ -280,7 +377,30 @@ pub fn balanced_sinkhorn(
     !is_finite(objective) {
     return Err(SinkhornError::NumericalFailure)
   }
-  Ok({
+  let seed : SinkhornWarmStart? = if capture_warm_start {
+    let source_potential = Array::make(rows, 0.0)
+    let target_potential = Array::make(columns, 0.0)
+    for i in 0..<rows {
+      if source[i] > 0.0 {
+        source_potential[i] = options.epsilon * log_u[i] + minimum_cost
+        if !is_finite(source_potential[i]) {
+          return Err(SinkhornError::NumericalFailure)
+        }
+      }
+    }
+    for j in 0..<columns {
+      if target[j] > 0.0 {
+        target_potential[j] = options.epsilon * log_v[j]
+        if !is_finite(target_potential[j]) {
+          return Err(SinkhornError::NumericalFailure)
+        }
+      }
+    }
+    Some({ source_potential, target_potential, })
+  } else {
+    None
+  }
+  let result : SinkhornResult = {
     coupling,
     transport_cost,
     entropy_regularizer,
@@ -288,7 +408,8 @@ pub fn balanced_sinkhorn(
     marginal_residual: residual,
     iterations,
     termination,
-  })
+  }
+  Ok((result, seed))
 }
 
 ///|

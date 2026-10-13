@@ -267,3 +267,109 @@ test "large finite masses remain finite in the log-domain solver" {
     }
   }
 }
+
+///|
+test "balanced warm start reduces iterations for a nearby epsilon-scaled solve" {
+  let source = [0.31, 0.28, 0.41]
+  let initial_target = [0.11, 0.56, 0.33]
+  let target = [0.11, 0.53, 0.36]
+  let cost = [[5.13, 0.15, 4.65], [2.24, 3.79, 0.89], [6.44, 4.28, 2.27]]
+  let coarse = @moonot.balanced_sinkhorn_with_warm_start(
+    source,
+    initial_target,
+    cost,
+    { epsilon: 2.0, tolerance: 1.0e-9, max_iterations: 1000, },
+    None,
+  )
+  match coarse {
+    Err(_) => assert_true(false)
+    Ok((_, seed)) => {
+      let warm = @moonot.balanced_sinkhorn_with_warm_start(
+        source,
+        target,
+        cost,
+        { epsilon: 0.5, tolerance: 1.0e-9, max_iterations: 1000, },
+        Some(seed),
+      )
+      let cold = @moonot.balanced_sinkhorn(source, target, cost, {
+        epsilon: 0.5,
+        tolerance: 1.0e-9,
+        max_iterations: 1000,
+      })
+      match (warm, cold) {
+        (Ok((warm_result, _)), Ok(cold_result)) => {
+          assert_true(
+            warm_result.termination is @moonot.SinkhornTermination::Converged,
+          )
+          assert_true(
+            cold_result.termination is @moonot.SinkhornTermination::Converged,
+          )
+          assert_true(warm_result.iterations < cold_result.iterations)
+          assert_true(
+            approximately_equal(
+              warm_result.regularized_objective,
+              cold_result.regularized_objective,
+              1.0e-7,
+            ),
+          )
+          for i in 0..<source.length() {
+            for j in 0..<target.length() {
+              assert_true(
+                approximately_equal(
+                  warm_result.coupling[i][j],
+                  cold_result.coupling[i][j],
+                  1.0e-7,
+                ),
+              )
+            }
+          }
+        }
+        _ => assert_true(false)
+      }
+    }
+  }
+}
+
+///|
+test "balanced solver rejects warm starts with incompatible dimensions" {
+  match
+    @moonot.balanced_sinkhorn_with_warm_start(
+      [0.5, 0.5],
+      [0.5, 0.5],
+      [[0.0, 1.0], [1.0, 0.0]],
+      { epsilon: 0.5, tolerance: 1.0e-10, max_iterations: 1000, },
+      None,
+    ) {
+    Err(_) => assert_true(false)
+    Ok((_, seed)) =>
+      assert_true(
+        @moonot.balanced_sinkhorn_with_warm_start(
+          [1.0],
+          [1.0],
+          [[0.0]],
+          { epsilon: 0.5, tolerance: 1.0e-10, max_iterations: 1000, },
+          Some(seed),
+        )
+        is Err(@moonot.SinkhornError::InvalidWarmStart),
+      )
+  }
+}
+
+///|
+test "cold balanced solve does not require representable dual potentials" {
+  match
+    @moonot.balanced_sinkhorn(
+      [1.0e-323, 1.0],
+      [1.0e-323, 1.0],
+      [[0.0, 0.0], [0.0, 0.0]],
+      { epsilon: 1.0e308, tolerance: 1.0e-320, max_iterations: 10, },
+    ) {
+    Err(_) => assert_true(false)
+    Ok(solution) => {
+      assert_true(
+        solution.termination is @moonot.SinkhornTermination::Converged,
+      )
+      assert_true(solution.regularized_objective < 0.0)
+    }
+  }
+}

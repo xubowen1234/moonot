@@ -24,6 +24,8 @@ The result exposes `transport_cost = sum_ij P[i,j] * C[i,j]` and `entropy_regula
 
 Zero-mass rows and columns receive zero coupling. An all-zero problem is valid and returns a zero plan, zero objective, and zero marginal residual. The result reports maximum absolute row/column marginal error, iteration count, and `Converged` or `IterationLimit`.
 
+`balanced_sinkhorn_with_warm_start` optionally accepts an opaque seed from an earlier balanced solve and returns the new result together with a seed for later reuse. Seed potentials are stored in cost units, so a caller may continue at another positive `epsilon`; the new solve still uses its own tolerance and iteration budget and reports its actual residual and termination status. Support dimensions must match. A warm start changes only the initial scaling state: it can reduce iterations for related problems, but no reduction or convergence improvement is guaranteed. The ordinary `balanced_sinkhorn` API retains the `SinkhornResult` shape and performs a cold start.
+
 ## KL-unbalanced entropic transport
 
 The unbalanced solver allows unequal source and target totals. For nonnegative finite `rho_source` and `rho_target`, positive finite `epsilon`, and nonnegative finite `cost_weight`, it minimizes

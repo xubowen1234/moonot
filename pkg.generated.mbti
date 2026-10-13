@@ -6,6 +6,8 @@ pub fn balanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], Sin
 
 pub fn balanced_sinkhorn_divergence(Array[Double], Array[Double], Array[Array[Double]], Array[Array[Double]], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornDivergenceResult, SinkhornDivergenceError]
 
+pub fn balanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Array[Double]], SinkhornOptions, SinkhornWarmStart?) -> Result[(SinkhornResult, SinkhornWarmStart), SinkhornError]
+
 pub fn coupling_barycentric_projection(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], CouplingProjectionError]
 
 pub fn coupling_marginals(Array[Array[Double]]) -> Result[CouplingMarginals, CouplingError]
@@ -139,6 +141,7 @@ pub(all) enum SinkhornError {
   InvalidEpsilon
   InvalidTolerance
   InvalidIterationLimit
+  InvalidWarmStart
   NumericalFailure
 }
 
@@ -161,6 +164,11 @@ pub(all) struct SinkhornResult {
 pub(all) enum SinkhornTermination {
   Converged
   IterationLimit
+}
+
+pub struct SinkhornWarmStart {
+  source_potential : Array[Double]
+  target_potential : Array[Double]
 }
 
 pub(all) enum UnbalancedSinkhornError {
