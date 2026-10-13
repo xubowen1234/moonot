@@ -65,6 +65,7 @@ match result {
 Each example is a real MoonBit executable package:
 
 ```sh
+moon run examples/point-cloud-transport
 moon run examples/ml-reweight
 moon run examples/color-histogram
 moon run examples/divisible-allocation
@@ -72,7 +73,7 @@ moon run examples/unbalanced-observations
 moon run examples/fixed-support-barycenter
 ```
 
-They demonstrate distribution reweighting, caller-prepared color histograms, divisible supply allocation, asymmetric missing/extra observation mass, and fixed-support weighted histogram aggregation. Image decoding, machine-learning estimators, and integer optimization remain the caller's responsibility.
+They demonstrate coordinate-derived point-cloud costs, distribution reweighting, caller-prepared color histograms, divisible supply allocation, asymmetric missing/extra observation mass, and fixed-support weighted histogram aggregation. Image decoding, machine-learning estimators, and integer optimization remain the caller's responsibility.
 
 ## Verification
 
