@@ -133,6 +133,14 @@ match @moonot.balanced_sinkhorn_with_warm_start(
 
 `SinkhornResult` remains the common diagnostics type; the opt-in API returns it together with an opaque seed so callers that do not use warm starts keep the ordinary result shape.
 
+## KL-unbalanced warm starts
+
+`unbalanced_sinkhorn_with_warm_start` accepts `None` for a cold solve or an opaque seed returned by an earlier unbalanced solve. It returns the ordinary `UnbalancedSinkhornResult` plus a fresh seed, including when the iteration budget is exhausted. The existing `unbalanced_sinkhorn` signature and result remain unchanged.
+
+Seeds contain private finite log scalings and the epsilon used to produce them. On an epsilon change, the solver converts each initialization by `log_scale_new = (epsilon_old / epsilon_new) * log_scale_old`; same-epsilon reuse copies the scaling directly. Source and target dimensions must match, and callers must preserve what each coordinate means and its ordering. Masses, support, costs, penalties, cost weight, epsilon, and iteration budget may otherwise change: the seed is an initializer, not a cached plan. Newly inactive coordinates and sides with zero marginal penalty start with neutral log scaling. A zero-support problem still returns its zero plan and exact zero-support KL constants; it also returns a neutral seed. Invalid seed structure yields `InvalidWarmStart`; an unrepresentable epsilon conversion is a numerical failure, never a silent cold fallback.
+
+Iterations and scaling residual describe only the current call. The solver always performs a sweep for a nonzero-support problem and re-evaluates the plan and objective using the current inputs. A seed may help or hinder convergence; no iteration reduction or speedup is guaranteed. The runnable `examples/unbalanced-continuation` reports its actual warm and cold counts for its fixed input.
+
 ## Runnable workflow examples
 
 Each example is a real MoonBit executable package:

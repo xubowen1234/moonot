@@ -4,6 +4,7 @@ All notable user-visible changes to MoonOT will be recorded here. Entries descri
 
 ## Unreleased
 
+- Added opt-in KL-unbalanced Sinkhorn continuation with a distinct opaque seed/error API, checked epsilon migration, per-call diagnostics, and a runnable changed-input example; no speedup is guaranteed.
 - Added `regularized_barycenter_with_costs` for fixed-support balanced barycenters with one validated square ground-cost matrix per measure, with per-matrix log-domain kernels and original-cost objective evaluation; the shared-cost API remains unchanged.
 
 - Added opt-in balanced Sinkhorn continuation with opaque cost-unit dual-potential seeds, preserving the existing `SinkhornResult` shape and reporting ordinary convergence diagnostics for each solve.

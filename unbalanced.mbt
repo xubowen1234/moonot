@@ -20,6 +20,20 @@ pub(all) struct UnbalancedSinkhornOptions {
 }
 
 ///|
+/// Opaque log-scaling state from a KL-unbalanced Sinkhorn solve.
+///
+/// A seed is only an initialization for a solve with the same source and
+/// target dimensions. Its arrays and source epsilon are private and copied on
+/// reuse; coordinate meaning and ordering remain the caller's responsibility.
+pub struct UnbalancedSinkhornWarmStart {
+  log_u : Array[Double]
+  log_v : Array[Double]
+  epsilon : Double
+  rows : Int
+  columns : Int
+}
+
+///|
 /// Plan, objective components, and diagnostics for a KL-unbalanced solve.
 ///
 /// The objective is
@@ -63,6 +77,13 @@ pub(all) enum UnbalancedSinkhornError {
 }
 
 ///|
+/// Compatibility and solver errors from the unbalanced warm-start API.
+pub(all) enum UnbalancedSinkhornWarmStartError {
+  SolverError(UnbalancedSinkhornError)
+  InvalidWarmStart
+}
+
+///|
 /// Solve entropy-regularized unbalanced optimal transport in the log domain.
 ///
 /// It minimizes
@@ -89,6 +110,65 @@ pub fn unbalanced_sinkhorn(
   cost : Array[Array[Double]],
   options : UnbalancedSinkhornOptions,
 ) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError] {
+  match unbalanced_validate_inputs(source, target, cost, options) {
+    Err(error) => Err(error)
+    Ok(_) =>
+      match
+        unbalanced_sinkhorn_internal(source, target, cost, options, None, false) {
+        Err(error) => Err(error)
+        Ok((result, _)) => Ok(result)
+      }
+  }
+}
+
+///|
+/// Solve KL-unbalanced transport from an optional prior solve's scaling state.
+///
+/// The returned seed is reusable even when this call reaches its iteration
+/// limit. A seed only initializes the next call: the new inputs, objective,
+/// tolerance, and iteration budget are evaluated normally. No speedup is
+/// guaranteed. Coordinates retain the caller-defined ordering.
+pub fn unbalanced_sinkhorn_with_warm_start(
+  source : Array[Double],
+  target : Array[Double],
+  cost : Array[Array[Double]],
+  options : UnbalancedSinkhornOptions,
+  warm_start : UnbalancedSinkhornWarmStart?,
+) -> Result[
+  (UnbalancedSinkhornResult, UnbalancedSinkhornWarmStart),
+  UnbalancedSinkhornWarmStartError,
+] {
+  match unbalanced_validate_inputs(source, target, cost, options) {
+    Err(error) => Err(UnbalancedSinkhornWarmStartError::SolverError(error))
+    Ok(_) =>
+      match unbalanced_prepare_warm_start(warm_start, source, target, options) {
+        Err(error) => Err(error)
+        Ok(initial) =>
+          match
+            unbalanced_sinkhorn_internal(
+              source, target, cost, options, initial, true,
+            ) {
+            Err(error) =>
+              Err(UnbalancedSinkhornWarmStartError::SolverError(error))
+            Ok((result, Some(seed))) => Ok((result, seed))
+            Ok(_) =>
+              Err(
+                UnbalancedSinkhornWarmStartError::SolverError(
+                  UnbalancedSinkhornError::NumericalFailure,
+                ),
+              )
+          }
+      }
+  }
+}
+
+///|
+fn unbalanced_validate_inputs(
+  source : Array[Double],
+  target : Array[Double],
+  cost : Array[Array[Double]],
+  options : UnbalancedSinkhornOptions,
+) -> Result[Unit, UnbalancedSinkhornError] {
   let rows = source.length()
   let columns = target.length()
   if rows == 0 {
@@ -149,6 +229,24 @@ pub fn unbalanced_sinkhorn(
     }
   }
 
+  Ok(())
+}
+
+///|
+fn unbalanced_sinkhorn_internal(
+  source : Array[Double],
+  target : Array[Double],
+  cost : Array[Array[Double]],
+  options : UnbalancedSinkhornOptions,
+  initial_scalings : (Array[Double], Array[Double])?,
+  capture_warm_start : Bool,
+) -> Result[
+  (UnbalancedSinkhornResult, UnbalancedSinkhornWarmStart?),
+  UnbalancedSinkhornError,
+] {
+  let rows = source.length()
+  let columns = target.length()
+
   let log_source = Array::make(rows, 0.0)
   let log_target = Array::make(columns, 0.0)
   let mut has_source_support = false
@@ -189,16 +287,33 @@ pub fn unbalanced_sinkhorn(
 
   let coupling = unbalanced_zero_plan(rows, columns)
   if !has_source_support || !has_target_support {
-    return unbalanced_make_result(
-      coupling,
-      source,
-      target,
-      cost,
-      options,
-      0.0,
-      0,
-      UnbalancedSinkhornTermination::Converged,
-    )
+    return match
+      unbalanced_make_result(
+        coupling,
+        source,
+        target,
+        cost,
+        options,
+        0.0,
+        0,
+        UnbalancedSinkhornTermination::Converged,
+      ) {
+      Err(error) => Err(error)
+      Ok(result) => {
+        let seed : UnbalancedSinkhornWarmStart? = if capture_warm_start {
+          Some(
+            unbalanced_make_seed(
+              Array::make(rows, 0.0),
+              Array::make(columns, 0.0),
+              options.epsilon,
+            ),
+          )
+        } else {
+          None
+        }
+        Ok((result, seed))
+      }
+    }
   }
 
   let source_relaxation = unbalanced_relaxation(
@@ -211,6 +326,21 @@ pub fn unbalanced_sinkhorn(
   )
   let log_u = Array::make(rows, 0.0)
   let log_v = Array::make(columns, 0.0)
+  match initial_scalings {
+    None => ()
+    Some((initial_u, initial_v)) => {
+      for i in 0..<rows {
+        if source[i] > 0.0 && options.rho_source > 0.0 {
+          log_u[i] = initial_u[i]
+        }
+      }
+      for j in 0..<columns {
+        if target[j] > 0.0 && options.rho_target > 0.0 {
+          log_v[j] = initial_v[j]
+        }
+      }
+    }
+  }
   let mut plan = coupling
   let mut scaling_residual = 0.0
   let mut iterations = 0
@@ -317,9 +447,150 @@ pub fn unbalanced_sinkhorn(
     }
   }
 
-  unbalanced_make_result(
-    plan, source, target, cost, options, scaling_residual, iterations, termination,
-  )
+  match
+    unbalanced_make_result(
+      plan, source, target, cost, options, scaling_residual, iterations, termination,
+    ) {
+    Err(error) => Err(error)
+    Ok(result) => {
+      let seed : UnbalancedSinkhornWarmStart? = if capture_warm_start {
+        Some(unbalanced_make_seed(log_u, log_v, options.epsilon))
+      } else {
+        None
+      }
+      Ok((result, seed))
+    }
+  }
+}
+
+///|
+fn unbalanced_prepare_warm_start(
+  warm_start : UnbalancedSinkhornWarmStart?,
+  source : Array[Double],
+  target : Array[Double],
+  options : UnbalancedSinkhornOptions,
+) -> Result[(Array[Double], Array[Double])?, UnbalancedSinkhornWarmStartError] {
+  match warm_start {
+    None => Ok(None)
+    Some(seed) => {
+      let rows = source.length()
+      let columns = target.length()
+      if seed.rows != rows ||
+        seed.columns != columns ||
+        seed.log_u.length() != rows ||
+        seed.log_v.length() != columns ||
+        !is_finite(seed.epsilon) ||
+        seed.epsilon <= 0.0 {
+        return Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart)
+      }
+      let log_u = Array::make(rows, 0.0)
+      let log_v = Array::make(columns, 0.0)
+      for i in 0..<rows {
+        if !is_finite(seed.log_u[i]) {
+          return Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart)
+        }
+        match
+          unbalanced_rescale_seed_log(
+            seed.log_u[i],
+            seed.epsilon,
+            options.epsilon,
+          ) {
+          Err(_) =>
+            return Err(
+              UnbalancedSinkhornWarmStartError::SolverError(
+                UnbalancedSinkhornError::NumericalFailure,
+              ),
+            )
+          Ok(value) =>
+            if source[i] > 0.0 && options.rho_source > 0.0 {
+              log_u[i] = value
+            }
+        }
+      }
+      for j in 0..<columns {
+        if !is_finite(seed.log_v[j]) {
+          return Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart)
+        }
+        match
+          unbalanced_rescale_seed_log(
+            seed.log_v[j],
+            seed.epsilon,
+            options.epsilon,
+          ) {
+          Err(_) =>
+            return Err(
+              UnbalancedSinkhornWarmStartError::SolverError(
+                UnbalancedSinkhornError::NumericalFailure,
+              ),
+            )
+          Ok(value) =>
+            if target[j] > 0.0 && options.rho_target > 0.0 {
+              log_v[j] = value
+            }
+        }
+      }
+      Ok(Some((log_u, log_v)))
+    }
+  }
+}
+
+///|
+fn unbalanced_rescale_seed_log(
+  value : Double,
+  old_epsilon : Double,
+  new_epsilon : Double,
+) -> Result[Double, Unit] {
+  if value == 0.0 || old_epsilon == new_epsilon {
+    return Ok(value)
+  }
+  let ratio = old_epsilon / new_epsilon
+  if is_finite(ratio) && ratio > 0.0 {
+    let direct = value * ratio
+    if is_finite(direct) {
+      return Ok(direct)
+    }
+  }
+  let staged = value / new_epsilon * old_epsilon
+  if is_finite(staged) {
+    return Ok(staged)
+  }
+  let log_magnitude = @math.ln(abs(value)) +
+    @math.ln(old_epsilon) -
+    @math.ln(new_epsilon)
+  if !is_finite(log_magnitude) || log_magnitude > 709.782712893384 {
+    return Err(())
+  }
+  if log_magnitude < -744.4400719213812 {
+    return Ok(0.0)
+  }
+  let magnitude = @math.exp(log_magnitude)
+  if !is_finite(magnitude) {
+    return Err(())
+  }
+  Ok(if value < 0.0 { -magnitude } else { magnitude })
+}
+
+///|
+fn unbalanced_make_seed(
+  log_u : Array[Double],
+  log_v : Array[Double],
+  epsilon : Double,
+) -> UnbalancedSinkhornWarmStart {
+  let copied_u = Array::make(log_u.length(), 0.0)
+  let copied_v = Array::make(log_v.length(), 0.0)
+  for i in 0..<log_u.length() {
+    copied_u[i] = log_u[i]
+  }
+  for j in 0..<log_v.length() {
+    copied_v[j] = log_v[j]
+  }
+  {
+    log_u: copied_u,
+    log_v: copied_v,
+    epsilon,
+    rows: log_u.length(),
+    columns: log_v.length(),
+  }
 }
 
 ///|

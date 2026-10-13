@@ -26,6 +26,8 @@ pub fn squared_euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]])
 
 pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError]
 
+pub fn unbalanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions, UnbalancedSinkhornWarmStart?) -> Result[(UnbalancedSinkhornResult, UnbalancedSinkhornWarmStart), UnbalancedSinkhornWarmStartError]
+
 // Errors
 
 // Types and methods
@@ -230,6 +232,19 @@ pub(all) struct UnbalancedSinkhornResult {
 pub(all) enum UnbalancedSinkhornTermination {
   Converged
   IterationLimit
+}
+
+pub struct UnbalancedSinkhornWarmStart {
+  log_u : Array[Double]
+  log_v : Array[Double]
+  epsilon : Double
+  rows : Int
+  columns : Int
+}
+
+pub(all) enum UnbalancedSinkhornWarmStartError {
+  SolverError(UnbalancedSinkhornError)
+  InvalidWarmStart
 }
 
 // Type aliases

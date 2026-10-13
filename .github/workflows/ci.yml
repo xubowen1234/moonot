@@ -64,4 +64,4 @@ jobs:
           moon run --target ${{ matrix.target }} cmd/main
           moon run --target ${{ matrix.target }} examples/point-cloud-transport
           moon run --target ${{ matrix.target }} examples/epsilon-scaling
-
+          moon run --target ${{ matrix.target }} examples/unbalanced-continuation
