@@ -12,7 +12,7 @@ MoonOT is a pure MoonBit library for regularized discrete optimal transport on f
 - Fixed-support regularized barycenters over a shared square cost matrix, with strictly positive internally normalized weights and an output total equal to the common input total.
 - Rectangular dense cost matrices, finite nonnegative masses/costs, and zero-support handling.
 - Optional pairwise squared-Euclidean, Euclidean, and Manhattan cost builders for finite point supports; callers can still provide costs from any domain-specific metric.
-- Structured errors, iteration-limit status, objective components, marginal residuals, and log-scaling residual for the unbalanced solver.
+- Balanced objective components and structured termination diagnostics; unbalanced objective components, marginal diagnostics, and log-scaling residual.
 
 The balanced objective is
 
@@ -71,6 +71,8 @@ let result = @moonot.balanced_sinkhorn(
 match result {
   Err(error) => println(error)
   Ok(solution) => {
+    println(solution.transport_cost)
+    println(solution.entropy_regularizer)
     println(solution.regularized_objective)
     println(solution.marginal_residual)
   }

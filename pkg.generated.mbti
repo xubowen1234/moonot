@@ -150,6 +150,8 @@ pub(all) struct SinkhornOptions {
 
 pub(all) struct SinkhornResult {
   coupling : Array[Array[Double]]
+  transport_cost : Double
+  entropy_regularizer : Double
   regularized_objective : Double
   marginal_residual : Double
   iterations : Int

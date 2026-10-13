@@ -20,6 +20,8 @@ The minimized objective is
 
 The entropy summand is zero for `P[i,j] = 0`, and `epsilon` is positive. The `-P` term is intentional: omitting it changes reported objective values by `epsilon * total_mass`, though not the optimizer.
 
+The result exposes `transport_cost = sum_ij P[i,j] * C[i,j]` and `entropy_regularizer = epsilon * sum_ij P[i,j] * (log(P[i,j]) - 1)` separately; the reported `regularized_objective` is their sum. Zero coupling entries contribute zero to both components. If either component or their sum is not representable as a finite `Double`, the solver returns `NumericalFailure`.
+
 Zero-mass rows and columns receive zero coupling. An all-zero problem is valid and returns a zero plan, zero objective, and zero marginal residual. The result reports maximum absolute row/column marginal error, iteration count, and `Converged` or `IterationLimit`.
 
 ## KL-unbalanced entropic transport

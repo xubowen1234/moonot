@@ -42,9 +42,24 @@ test "symmetric balanced transport converges and reports objective" {
       assert_true(
         approximately_equal(solution.coupling[1][1], diagonal, 1.0e-12),
       )
-      let expected_objective = 2.0 * diagonal * (@math.ln(diagonal) - 1.0) +
-        2.0 * off_diagonal * (@math.ln(off_diagonal) - 1.0) +
-        2.0 * off_diagonal
+      let expected_transport_cost = 2.0 * off_diagonal
+      let expected_entropy = 2.0 * diagonal * (@math.ln(diagonal) - 1.0) +
+        2.0 * off_diagonal * (@math.ln(off_diagonal) - 1.0)
+      let expected_objective = expected_transport_cost + expected_entropy
+      assert_true(
+        approximately_equal(
+          solution.transport_cost,
+          expected_transport_cost,
+          1.0e-12,
+        ),
+      )
+      assert_true(
+        approximately_equal(
+          solution.entropy_regularizer,
+          expected_entropy,
+          1.0e-12,
+        ),
+      )
       assert_true(
         approximately_equal(
           solution.regularized_objective,
@@ -90,6 +105,8 @@ test "all-zero marginals return a zero plan without iterations" {
     Ok(solution) => {
       assert_eq(solution.iterations, 0)
       assert_eq(solution.marginal_residual, 0.0)
+      assert_eq(solution.transport_cost, 0.0)
+      assert_eq(solution.entropy_regularizer, 0.0)
       assert_eq(solution.regularized_objective, 0.0)
       assert_true(
         solution.termination is @moonot.SinkhornTermination::Converged,

@@ -19,6 +19,8 @@ pub(all) struct SinkhornOptions {
 /// `<P, C> + epsilon * sum(P * (log(P) - 1))`.
 pub(all) struct SinkhornResult {
   coupling : Array[Array[Double]]
+  transport_cost : Double
+  entropy_regularizer : Double
   regularized_objective : Double
   marginal_residual : Double
   iterations : Int
@@ -142,6 +144,8 @@ pub fn balanced_sinkhorn(
   if source_total == 0.0 && target_total == 0.0 {
     return Ok({
       coupling: zero_plan,
+      transport_cost: 0.0,
+      entropy_regularizer: 0.0,
       regularized_objective: 0.0,
       marginal_residual: 0.0,
       iterations: 0,
@@ -265,12 +269,21 @@ pub fn balanced_sinkhorn(
     }
   }
 
-  let objective = regularized_objective(coupling, cost, options.epsilon)
-  if !is_finite(objective) {
+  let (transport_cost, entropy_regularizer) = balanced_objective_components(
+    coupling,
+    cost,
+    options.epsilon,
+  )
+  let objective = transport_cost + entropy_regularizer
+  if !is_finite(transport_cost) ||
+    !is_finite(entropy_regularizer) ||
+    !is_finite(objective) {
     return Err(SinkhornError::NumericalFailure)
   }
   Ok({
     coupling,
+    transport_cost,
+    entropy_regularizer,
     regularized_objective: objective,
     marginal_residual: residual,
     iterations,
@@ -340,21 +353,22 @@ fn marginal_residual(
 }
 
 ///|
-fn regularized_objective(
+fn balanced_objective_components(
   coupling : Array[Array[Double]],
   cost : Array[Array[Double]],
   epsilon : Double,
-) -> Double {
-  let mut objective = 0.0
+) -> (Double, Double) {
+  let mut transport_cost = 0.0
+  let mut entropy_regularizer = 0.0
   for i in 0..<coupling.length() {
     for j in 0..<coupling[i].length() {
       let mass = coupling[i][j]
       if mass > 0.0 {
-        let contribution = mass * cost[i][j] +
+        transport_cost = transport_cost + mass * cost[i][j]
+        entropy_regularizer = entropy_regularizer +
           epsilon * mass * (@math.ln(mass) - 1.0)
-        objective = objective + contribution
       }
     }
   }
-  objective
+  (transport_cost, entropy_regularizer)
 }
