@@ -42,6 +42,10 @@ let manhattan = @moonot.manhattan_cost_matrix(source_points, target_points)
 
 Rows correspond to source points and columns to target points. Inputs are validated for empty or ragged supports, dimension mismatch, non-finite coordinates, and unrepresentable results. Euclidean accumulation uses a scaled hypot operation; squared-Euclidean and Manhattan costs return a typed overflow error when their mathematically defined result cannot be represented as a finite `Double`.
 
+## Coupling diagnostics
+
+Both transport solvers return their dense coupling plan. `coupling_marginals` computes its source-row and target-column totals, while `coupling_transport_cost` computes the unregularized inner product `<P, C>` for the same-shaped plan and cost matrix. These utilities reject empty, ragged, or mismatched shapes and negative or non-finite entries with typed `CouplingError` variants; non-finite accumulated totals, products, or dot products return a numerical-overflow error. They do not add the entropy or KL terms from a solver objective. In an unbalanced solve, the plan's marginals are diagnostics and need not equal the input marginals.
+
 ## Balanced example
 
 ```moonbit

@@ -6,6 +6,10 @@ pub fn balanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], Sin
 
 pub fn balanced_sinkhorn_divergence(Array[Double], Array[Double], Array[Array[Double]], Array[Array[Double]], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornDivergenceResult, SinkhornDivergenceError]
 
+pub fn coupling_marginals(Array[Array[Double]]) -> Result[CouplingMarginals, CouplingError]
+
+pub fn coupling_transport_cost(Array[Array[Double]], Array[Array[Double]]) -> Result[Double, CouplingError]
+
 pub fn euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
 
 pub fn manhattan_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
@@ -54,6 +58,24 @@ pub(all) struct BarycenterResult {
 pub(all) enum BarycenterTermination {
   Converged
   IterationLimit
+}
+
+pub(all) enum CouplingError {
+  EmptyCoupling
+  EmptyCouplingRow(Int)
+  RaggedCouplingRow(Int, Int, Int)
+  NonFiniteCouplingEntry(Int, Int)
+  NegativeCouplingEntry(Int, Int)
+  CostRowCountMismatch
+  CostColumnCountMismatch(Int)
+  NonFiniteCost(Int, Int)
+  NegativeCost(Int, Int)
+  NumericalOverflow(Int, Int)
+}
+
+pub(all) struct CouplingMarginals {
+  source : Array[Double]
+  target : Array[Double]
 }
 
 pub(all) enum PointCostError {

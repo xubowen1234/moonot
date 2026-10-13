@@ -34,6 +34,12 @@ Here `KL(x || y) = sum_k (x_k * log(x_k / y_k) - x_k + y_k)` is the generalized 
 
 The unbalanced solver uses asymmetric generalized scaling exponents `rho / (rho + epsilon)` for the source and target updates. It reports the objective and its four components, maximum absolute differences from the supplied marginals (diagnostics only), maximum log-scaling update, iteration count, and termination status. No normalization or balanced marginal constraint is implied.
 
+## Dense coupling diagnostics
+
+A coupling plan is a non-empty rectangular dense matrix `P` of finite, nonnegative `Double` entries. Zero entries are valid. `coupling_marginals(P)` returns the row totals as the source marginal and the column totals as the target marginal, preserving that orientation. It does not assert that either total matches any input measure. If either accumulated total is not representable as a finite `Double`, the call returns `CouplingError::NumericalOverflow` at the cell where the overflow is detected.
+
+`coupling_transport_cost(P, C)` requires a non-empty rectangular finite, nonnegative cost matrix with exactly the same row and column counts as `P`; it returns the unregularized dot product `sum_ij P[i,j] * C[i,j]`. A non-finite product or accumulated dot product returns `NumericalOverflow`. It does not compute or approximate entropy, reference KL, marginal penalties, a regularized objective, or an optimality certificate. These utilities can inspect plans returned by balanced or unbalanced solvers; in an unbalanced solve, the computed row and column totals are not required to match the supplied marginals.
+
 ## Sinkhorn divergence
 
 The debiased value uses the same balanced entropic objective for cross and self problems:
