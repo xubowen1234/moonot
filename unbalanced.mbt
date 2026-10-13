@@ -489,44 +489,46 @@ fn unbalanced_prepare_warm_start(
         if !is_finite(seed.log_u[i]) {
           return Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart)
         }
-        match
-          unbalanced_rescale_seed_log(
-            seed.log_u[i],
-            seed.epsilon,
-            options.epsilon,
-          ) {
-          Err(_) =>
-            return Err(
-              UnbalancedSinkhornWarmStartError::SolverError(
-                UnbalancedSinkhornError::NumericalFailure,
-              ),
-            )
-          Ok(value) =>
-            if source[i] > 0.0 && options.rho_source > 0.0 {
-              log_u[i] = value
-            }
-        }
       }
       for j in 0..<columns {
         if !is_finite(seed.log_v[j]) {
           return Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart)
         }
-        match
-          unbalanced_rescale_seed_log(
-            seed.log_v[j],
-            seed.epsilon,
-            options.epsilon,
-          ) {
-          Err(_) =>
-            return Err(
-              UnbalancedSinkhornWarmStartError::SolverError(
-                UnbalancedSinkhornError::NumericalFailure,
-              ),
-            )
-          Ok(value) =>
-            if target[j] > 0.0 && options.rho_target > 0.0 {
-              log_v[j] = value
-            }
+      }
+      for i in 0..<rows {
+        if source[i] > 0.0 && options.rho_source > 0.0 {
+          match
+            unbalanced_rescale_seed_log(
+              seed.log_u[i],
+              seed.epsilon,
+              options.epsilon,
+            ) {
+            Err(_) =>
+              return Err(
+                UnbalancedSinkhornWarmStartError::SolverError(
+                  UnbalancedSinkhornError::NumericalFailure,
+                ),
+              )
+            Ok(value) => log_u[i] = value
+          }
+        }
+      }
+      for j in 0..<columns {
+        if target[j] > 0.0 && options.rho_target > 0.0 {
+          match
+            unbalanced_rescale_seed_log(
+              seed.log_v[j],
+              seed.epsilon,
+              options.epsilon,
+            ) {
+            Err(_) =>
+              return Err(
+                UnbalancedSinkhornWarmStartError::SolverError(
+                  UnbalancedSinkhornError::NumericalFailure,
+                ),
+              )
+            Ok(value) => log_v[j] = value
+          }
         }
       }
       Ok(Some((log_u, log_v)))

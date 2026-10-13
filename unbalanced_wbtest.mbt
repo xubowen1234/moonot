@@ -143,6 +143,98 @@ test "seed input arrays and returned coupling are isolated from internal state" 
 }
 
 ///|
+test "dormant finite warm-start potentials skip epsilon migration" {
+  let seed = UnbalancedSinkhornWarmStart::{
+    log_u: [1.0e100],
+    log_v: [0.0],
+    epsilon: 1.0e308,
+    rows: 1,
+    columns: 1,
+  }
+  let options : UnbalancedSinkhornOptions = {
+    epsilon: 1.0e-308,
+    rho_source: 1.0,
+    rho_target: 1.0,
+    cost_weight: 1.0,
+    tolerance: 1.0e-10,
+    max_iterations: 10,
+  }
+  match
+    unbalanced_sinkhorn_with_warm_start(
+      [0.0],
+      [1.0],
+      [[0.0]],
+      options,
+      Some(seed),
+    ) {
+    Err(_) => assert_true(false)
+    Ok((warm, returned_seed)) => {
+      match unbalanced_sinkhorn([0.0], [1.0], [[0.0]], options) {
+        Err(_) => assert_true(false)
+        Ok(cold) => {
+          assert_eq(warm.coupling, cold.coupling)
+          assert_eq(warm.objective, cold.objective)
+          assert_eq(warm.transport_cost, cold.transport_cost)
+          assert_eq(warm.reference_kl, cold.reference_kl)
+          assert_eq(warm.source_marginal_kl, cold.source_marginal_kl)
+          assert_eq(warm.target_marginal_kl, cold.target_marginal_kl)
+        }
+      }
+      assert_eq(returned_seed.log_u, [0.0])
+      assert_eq(returned_seed.log_v, [0.0])
+    }
+  }
+
+  let zero_source_penalty_options : UnbalancedSinkhornOptions = {
+    epsilon: 1.0e-308,
+    rho_source: 0.0,
+    rho_target: 1.0,
+    cost_weight: 1.0,
+    tolerance: 1.0e-10,
+    max_iterations: 10,
+  }
+  match
+    unbalanced_sinkhorn_with_warm_start(
+      [1.0],
+      [1.0],
+      [[0.0]],
+      zero_source_penalty_options,
+      Some(seed),
+    ) {
+    Err(_) => assert_true(false)
+    Ok((warm, returned_seed)) => {
+      match
+        unbalanced_sinkhorn([1.0], [1.0], [[0.0]], zero_source_penalty_options) {
+        Err(_) => assert_true(false)
+        Ok(cold) => {
+          assert_eq(warm.coupling, cold.coupling)
+          assert_eq(warm.objective, cold.objective)
+        }
+      }
+      assert_eq(returned_seed.log_u, [0.0])
+    }
+  }
+
+  let nonfinite_dormant_seed = UnbalancedSinkhornWarmStart::{
+    log_u: [@math.exp(1000.0)],
+    log_v: [0.0],
+    epsilon: 1.0e308,
+    rows: 1,
+    columns: 1,
+  }
+  assert_true(
+    unbalanced_sinkhorn_with_warm_start(
+      [0.0],
+      [1.0],
+      [[0.0]],
+      options,
+      Some(nonfinite_dormant_seed),
+    )
+    is Err(UnbalancedSinkhornWarmStartError::InvalidWarmStart),
+  )
+}
+
+///|
 test "unrepresentable public epsilon migration reports numerical failure" {
   let seed = UnbalancedSinkhornWarmStart::{
     log_u: [1.0e100],
