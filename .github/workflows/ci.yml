@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: Apache-2.0
+name: MoonBit CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formatting-and-interface:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 line
+      - name: Set up MoonBit
+        uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76 # reviewed 2026-10-13
+        with:
+          version: 0.1.20260920
+          setup-core: true
+      - name: Check formatting
+        run: moon fmt --check
+      - name: Check generated public interfaces
+        shell: bash
+        run: |
+          moon info
+          git diff --exit-code -- '**/*.mbti'
+
+  targets:
+    needs: formatting-and-interface
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [wasm-gc, wasm, js, native]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 line
+      - name: Set up MoonBit
+        uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76 # reviewed 2026-10-13
+        with:
+          version: 0.1.20260920
+          setup-core: true
+      - name: Check (${{ matrix.target }})
+        run: moon check --deny-warn --target ${{ matrix.target }}
+      - name: Build (${{ matrix.target }})
+        run: moon build --deny-warn --target ${{ matrix.target }}
+      - name: Test (${{ matrix.target }})
+        run: moon test --deny-warn --target ${{ matrix.target }}
+      - name: Run examples (${{ matrix.target }})
+        shell: bash
+        run: |
+          moon run --target ${{ matrix.target }} examples/ml-reweight
+          moon run --target ${{ matrix.target }} examples/color-histogram
+          moon run --target ${{ matrix.target }} examples/divisible-allocation
+          moon run --target ${{ matrix.target }} examples/unbalanced-observations
+          moon run --target ${{ matrix.target }} examples/fixed-support-barycenter
+          moon run --target ${{ matrix.target }} cmd/main
+

@@ -1,0 +1,161 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "xubowen1234/moonot"
+
+// Values
+pub fn balanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornResult, SinkhornError]
+
+pub fn balanced_sinkhorn_divergence(Array[Double], Array[Double], Array[Array[Double]], Array[Array[Double]], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornDivergenceResult, SinkhornDivergenceError]
+
+pub fn regularized_barycenter(Array[Array[Double]], Array[Double], Array[Array[Double]], SinkhornOptions) -> Result[BarycenterResult, BarycenterError]
+
+pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError]
+
+// Errors
+
+// Types and methods
+pub(all) enum BarycenterError {
+  EmptyMeasures
+  WeightCountMismatch
+  EmptySupport
+  EmptyMeasure(Int)
+  CostRowCountMismatch
+  CostColumnCountMismatch(Int)
+  NonFiniteWeight(Int)
+  NonPositiveWeight(Int)
+  NonFiniteWeightTotal
+  NonFiniteMass(Int, Int)
+  NegativeMass(Int, Int)
+  NonFiniteMeasureTotal(Int)
+  UnequalMeasureTotal(Int)
+  NonFiniteCost(Int, Int)
+  NegativeCost(Int, Int)
+  InvalidEpsilon
+  InvalidTolerance
+  InvalidIterationLimit
+  SolverError(SinkhornError)
+  NumericalFailure
+}
+
+pub(all) struct BarycenterResult {
+  barycenter : Array[Double]
+  weighted_objective : Double
+  maximum_transport_residual : Double
+  log_barycenter_residual : Double
+  iterations : Int
+  termination : BarycenterTermination
+}
+
+pub(all) enum BarycenterTermination {
+  Converged
+  IterationLimit
+}
+
+pub(all) enum SinkhornDivergenceError {
+  SourceSelfCostRowCountMismatch
+  SourceSelfCostColumnCountMismatch(Int)
+  TargetSelfCostRowCountMismatch
+  TargetSelfCostColumnCountMismatch(Int)
+  AsymmetricSourceSelfCost(Int, Int)
+  AsymmetricTargetSelfCost(Int, Int)
+  CrossTransport(SinkhornError)
+  SourceSelfTransport(SinkhornError)
+  TargetSelfTransport(SinkhornError)
+  NumericalFailure
+}
+
+pub(all) struct SinkhornDivergenceResult {
+  value : Double
+  cross : SinkhornResult
+  source_self : SinkhornResult
+  target_self : SinkhornResult
+}
+
+pub(all) enum SinkhornError {
+  EmptySourceMarginal
+  EmptyTargetMarginal
+  CostRowCountMismatch
+  CostColumnCountMismatch(Int)
+  NegativeSourceMass(Int)
+  NegativeTargetMass(Int)
+  NonFiniteSourceMass(Int)
+  NonFiniteTargetMass(Int)
+  NonFiniteTotalMass
+  UnequalTotalMass
+  NegativeCost(Int, Int)
+  NonFiniteCost(Int, Int)
+  InvalidEpsilon
+  InvalidTolerance
+  InvalidIterationLimit
+  NumericalFailure
+}
+
+pub(all) struct SinkhornOptions {
+  epsilon : Double
+  tolerance : Double
+  max_iterations : Int
+}
+
+pub(all) struct SinkhornResult {
+  coupling : Array[Array[Double]]
+  regularized_objective : Double
+  marginal_residual : Double
+  iterations : Int
+  termination : SinkhornTermination
+}
+
+pub(all) enum SinkhornTermination {
+  Converged
+  IterationLimit
+}
+
+pub(all) enum UnbalancedSinkhornError {
+  EmptySourceMarginal
+  EmptyTargetMarginal
+  CostRowCountMismatch
+  CostColumnCountMismatch(Int)
+  NegativeSourceMass(Int)
+  NegativeTargetMass(Int)
+  NonFiniteSourceMass(Int)
+  NonFiniteTargetMass(Int)
+  NegativeCost(Int, Int)
+  NonFiniteCost(Int, Int)
+  InvalidEpsilon
+  InvalidSourcePenalty
+  InvalidTargetPenalty
+  InvalidCostWeight
+  InvalidTolerance
+  InvalidIterationLimit
+  NumericalFailure
+}
+
+pub(all) struct UnbalancedSinkhornOptions {
+  epsilon : Double
+  rho_source : Double
+  rho_target : Double
+  cost_weight : Double
+  tolerance : Double
+  max_iterations : Int
+}
+
+pub(all) struct UnbalancedSinkhornResult {
+  coupling : Array[Array[Double]]
+  objective : Double
+  transport_cost : Double
+  reference_kl : Double
+  source_marginal_kl : Double
+  target_marginal_kl : Double
+  source_marginal_residual : Double
+  target_marginal_residual : Double
+  scaling_residual : Double
+  iterations : Int
+  termination : UnbalancedSinkhornTermination
+}
+
+pub(all) enum UnbalancedSinkhornTermination {
+  Converged
+  IterationLimit
+}
+
+// Type aliases
+
+// Traits
