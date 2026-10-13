@@ -40,6 +40,10 @@ A coupling plan is a non-empty rectangular dense matrix `P` of finite, nonnegati
 
 `coupling_transport_cost(P, C)` requires a non-empty rectangular finite, nonnegative cost matrix with exactly the same row and column counts as `P`; it returns the unregularized dot product `sum_ij P[i,j] * C[i,j]`. A non-finite product or accumulated dot product returns `NumericalOverflow`. It does not compute or approximate entropy, reference KL, marginal penalties, a regularized objective, or an optimality certificate. These utilities can inspect plans returned by balanced or unbalanced solvers; in an unbalanced solve, the computed row and column totals are not required to match the supplied marginals.
 
+## Conditional barycentric projection
+
+`coupling_barycentric_projection(P, Y)` accepts a coupling `P` and a rectangular target feature matrix `Y` with one non-empty feature vector per coupling column. All target values must be finite; feature vectors must have a common dimension. For source row `i` with mass `r_i = sum_j P[i,j] > 0`, it returns `T[i,:] = sum_j (P[i,j] / r_i) * Y[j,:]`. Thus each output is a conditional mean in target-feature space and is invariant to positive rescaling of a coupling row. A zero-mass source row returns `CouplingProjectionError::ZeroMassSourceRow(i)` because its conditional mean is undefined. A zero-mass target column has zero weight and contributes nothing. For each feature, the implementation scales active values by their largest absolute magnitude before weighted accumulation and rescales the result, preserving the convex-hull bound for finite inputs. This is a soft numeric projection, not an integer assignment or a guarantee of an inverse/one-to-one map.
+
 ## Sinkhorn divergence
 
 The debiased value uses the same balanced entropic objective for cross and self problems:

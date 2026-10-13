@@ -1,5 +1,6 @@
 ///|
-/// Construct geometric costs and solve a small point-cloud transport problem.
+/// Construct point-cloud costs, solve a transport problem, and project target
+/// coordinates back to each source point through the conditional coupling.
 fn main {
   let source_points = [[0.0], [2.0]]
   let target_points = [[0.0], [2.0]]
@@ -28,6 +29,19 @@ fn main {
           }
           println("maximum marginal residual:")
           println(solution.marginal_residual)
+          match
+            @moonot.coupling_barycentric_projection(
+              solution.coupling,
+              target_points,
+            ) {
+            Err(_) => println("target projection is undefined or invalid")
+            Ok(projected) => {
+              println("conditional target coordinate by source point:")
+              for i in 0..<projected.length() {
+                println(projected[i][0])
+              }
+            }
+          }
         }
       }
   }

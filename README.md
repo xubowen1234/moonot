@@ -46,6 +46,19 @@ Rows correspond to source points and columns to target points. Inputs are valida
 
 Both transport solvers return their dense coupling plan. `coupling_marginals` computes its source-row and target-column totals, while `coupling_transport_cost` computes the unregularized inner product `<P, C>` for the same-shaped plan and cost matrix. These utilities reject empty, ragged, or mismatched shapes and negative or non-finite entries with typed `CouplingError` variants; non-finite accumulated totals, products, or dot products return a numerical-overflow error. They do not add the entropy or KL terms from a solver objective. In an unbalanced solve, the plan's marginals are diagnostics and need not equal the input marginals.
 
+## Coupling barycentric projection
+
+For a coupling `P` and one finite feature vector per target column, `coupling_barycentric_projection` returns the conditional weighted mean at each source row. This turns a point-cloud coupling into a soft source-to-target map without selecting a single target or changing the solver's plan:
+
+```moonbit
+let projected = @moonot.coupling_barycentric_projection(
+  solution.coupling,
+  target_points,
+)
+```
+
+The target feature matrix must be rectangular and non-empty. Zero-mass source rows are reported as an undefined projection rather than silently filled with a sentinel. A zero-mass target column contributes nothing. Each feature is scaled by its largest active magnitude before accumulation, keeping the convex weighted mean finite for extreme finite coordinates. This operation works for numeric features; it does not decode images or perform categorical/integer assignment.
+
 ## Balanced example
 
 ```moonbit

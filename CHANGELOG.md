@@ -5,6 +5,7 @@ All notable user-visible changes to MoonOT will be recorded here. Entries descri
 ## Unreleased
 
 - Added validated dense-coupling diagnostics for row/column marginals and unregularized transport cost, with shape, numeric-domain, and overflow errors.
+- Added conditional barycentric projection from coupling rows to finite target feature vectors, with explicit zero-mass-row and shape errors.
 - Implemented balanced entropy-regularized Sinkhorn transport and KL-unbalanced Sinkhorn transport with explicit objectives and termination/residual diagnostics.
 - Implemented balanced Sinkhorn divergence from cross and self-transport objectives, with caller-supplied cost matrices.
 - Implemented fixed-support regularized barycenters using strictly positive, internally normalized weights over equal-total input measures; the output preserves their common total mass.
