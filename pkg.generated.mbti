@@ -6,7 +6,13 @@ pub fn balanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], Sin
 
 pub fn balanced_sinkhorn_divergence(Array[Double], Array[Double], Array[Array[Double]], Array[Array[Double]], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornDivergenceResult, SinkhornDivergenceError]
 
+pub fn euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
+
+pub fn manhattan_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
+
 pub fn regularized_barycenter(Array[Array[Double]], Array[Double], Array[Array[Double]], SinkhornOptions) -> Result[BarycenterResult, BarycenterError]
+
+pub fn squared_euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
 
 pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError]
 
@@ -48,6 +54,19 @@ pub(all) struct BarycenterResult {
 pub(all) enum BarycenterTermination {
   Converged
   IterationLimit
+}
+
+pub(all) enum PointCostError {
+  EmptySourceSupport
+  EmptyTargetSupport
+  EmptySourcePoint(Int)
+  EmptyTargetPoint(Int)
+  SourcePointDimensionMismatch(Int, Int, Int)
+  TargetPointDimensionMismatch(Int, Int, Int)
+  PointDimensionMismatch(Int, Int)
+  NonFiniteSourceCoordinate(Int, Int)
+  NonFiniteTargetCoordinate(Int, Int)
+  NumericalOverflow(Int, Int)
 }
 
 pub(all) enum SinkhornDivergenceError {

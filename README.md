@@ -11,6 +11,7 @@ MoonOT is a pure MoonBit library for regularized discrete optimal transport on f
 - Debiased Sinkhorn divergence using explicit cross/source-self/target-self cost matrices.
 - Fixed-support regularized barycenters over a shared square cost matrix, with strictly positive internally normalized weights and an output total equal to the common input total.
 - Rectangular dense cost matrices, finite nonnegative masses/costs, and zero-support handling.
+- Optional pairwise squared-Euclidean, Euclidean, and Manhattan cost builders for finite point supports; callers can still provide costs from any domain-specific metric.
 - Structured errors, iteration-limit status, objective components, marginal residuals, and log-scaling residual for the unbalanced solver.
 
 The balanced objective is
@@ -26,6 +27,20 @@ The KL-unbalanced objective is
 `<P, cost_weight*C> + epsilon*KL(P || a⊗b) + rho_source*KL(P1 || a) + rho_target*KL(Pᵀ1 || b)`,
 
 where `KL(x || y) = sum(x*log(x/y) - x + y)` with explicit zero-mass boundary conventions. See [the numerical contract](docs/algorithm-contract.md) for equations, input rules, convergence semantics, and scope boundaries; see [the bounded duplication review](docs/competition/duplicate-check.md) for recorded ecosystem checks.
+
+## Point-cloud cost construction
+
+The core solvers accept caller-supplied costs. For finite point clouds with a shared coordinate dimension, the package also provides three rectangular builders:
+
+```moonbit
+let source_points = [[0.0, 0.0], [3.0, 4.0]]
+let target_points = [[0.0, 2.0], [3.0, 4.0]]
+let squared = @moonot.squared_euclidean_cost_matrix(source_points, target_points)
+let euclidean = @moonot.euclidean_cost_matrix(source_points, target_points)
+let manhattan = @moonot.manhattan_cost_matrix(source_points, target_points)
+```
+
+Rows correspond to source points and columns to target points. Inputs are validated for empty or ragged supports, dimension mismatch, non-finite coordinates, and unrepresentable results. Euclidean accumulation uses a scaled hypot operation; squared-Euclidean and Manhattan costs return a typed overflow error when their mathematically defined result cannot be represented as a finite `Double`.
 
 ## Balanced example
 
@@ -75,7 +90,7 @@ The configured CI workflow checks generated interfaces and formatting, then runs
 
 ## Boundaries
 
-MoonOT does not implement a generic linear/integer programming solver, indivisible assignment, route planning, image decoding, automatic differentiation, GPU kernels, or a machine-learning framework. Couplings represent divisible mass plans. Domain applications construct costs and interpret transport outputs.
+MoonOT does not implement a generic linear/integer programming solver, indivisible assignment, route planning, image decoding, automatic differentiation, GPU kernels, or a machine-learning framework. Couplings represent divisible mass plans. Domain applications can use the built-in point metrics or supply domain-specific costs, then interpret transport outputs.
 
 ## Development and provenance
 
