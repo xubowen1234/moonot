@@ -19,8 +19,8 @@ repository = ""
 
 license = "Apache-2.0"
 
-keywords = [ ]
+keywords = [ "optimal-transport", "sinkhorn", "optimization", "numerics" ]
 
 preferred_target = "wasm"
 
-description = ""
+description = "Finite-support regularized optimal transport solvers in MoonBit"
