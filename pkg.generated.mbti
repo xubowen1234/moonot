@@ -14,7 +14,11 @@ pub fn coupling_barycentric_projection(Array[Array[Double]], Array[Array[Double]
 
 pub fn coupling_marginals(Array[Array[Double]]) -> Result[CouplingMarginals, CouplingError]
 
+pub fn coupling_permute(Array[Array[Double]], Array[Int], Array[Int]) -> Result[Array[Array[Double]], CouplingOrientationError]
+
 pub fn coupling_transport_cost(Array[Array[Double]], Array[Array[Double]]) -> Result[Double, CouplingError]
+
+pub fn coupling_transpose(Array[Array[Double]]) -> Result[Array[Array[Double]], CouplingError]
 
 pub fn euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
 
@@ -99,6 +103,16 @@ pub(all) enum CouplingError {
 pub(all) struct CouplingMarginals {
   source : Array[Double]
   target : Array[Double]
+}
+
+pub(all) enum CouplingOrientationError {
+  InvalidCoupling(CouplingError)
+  SourcePermutationLength
+  TargetPermutationLength
+  SourceIndexOutOfRange(Int)
+  TargetIndexOutOfRange(Int)
+  DuplicateSourceIndex(Int)
+  DuplicateTargetIndex(Int)
 }
 
 pub(all) enum CouplingProjectionError {
