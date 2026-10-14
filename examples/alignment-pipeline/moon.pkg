@@ -1,0 +1,5 @@
+import {
+  "xubowen1234/moonot",
+}
+
+pkgtype(kind: "executable")
