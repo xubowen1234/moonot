@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76
         with:
-          version: 0.1.20260920
+          version: 0.10.14+7d59c7ec9
           setup-core: true
           core-version: 0.10.14+7d59c7ec9
       - run: moon version --all
