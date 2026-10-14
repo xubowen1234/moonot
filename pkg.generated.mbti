@@ -32,6 +32,8 @@ pub fn regularized_barycenter(Array[Array[Double]], Array[Double], Array[Array[D
 
 pub fn regularized_barycenter_with_costs(Array[Array[Double]], Array[Double], Array[Array[Array[Double]]], SinkhornOptions) -> Result[BarycenterResult, BarycenterCostsError]
 
+pub fn round_balanced_coupling(Array[Array[Double]], Array[Double], Array[Double], Double) -> Result[CouplingRoundingResult, CouplingRoundingError]
+
 pub fn squared_euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], PointCostError]
 
 pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions) -> Result[UnbalancedSinkhornResult, UnbalancedSinkhornError]
@@ -136,6 +138,27 @@ pub(all) enum CouplingProjectionError {
   NonFiniteTargetValue(Int, Int)
   ZeroMassSourceRow(Int)
   NumericalOverflow(Int, Int)
+}
+
+pub(all) enum CouplingRoundingError {
+  InvalidCoupling(CouplingError)
+  SourceCountMismatch
+  TargetCountMismatch
+  NonFiniteSourceMass(Int)
+  NonFiniteTargetMass(Int)
+  NegativeSourceMass(Int)
+  NegativeTargetMass(Int)
+  NonFiniteSourceTotal
+  NonFiniteTargetTotal
+  UnequalTotalMass
+  InvalidTolerance
+  NumericalFailure
+  FeasibilityFailure(Double)
+}
+
+pub(all) struct CouplingRoundingResult {
+  coupling : Array[Array[Double]]
+  marginal_residual : Double
 }
 
 pub(all) enum PointCostError {
