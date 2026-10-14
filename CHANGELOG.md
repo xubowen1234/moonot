@@ -2,6 +2,10 @@
 
 All notable user-visible changes to MoonOT will be recorded here. Entries describe repository capabilities and do not imply publication.
 
+## 0.1.1 — 2026-10-14
+
+- 将主 README 与包简介改为中文，补齐安装说明、全部可运行示例和数值边界；公共 API 与算法实现未改变。
+
 ## 0.1.0 — 2026-10-14
 
 - Added feature-weighted ground costs, bounded epsilon schedules, coupling orientation, entropy/generalized KL, balanced feasibility rounding, and Markov composition with typed validation failures.
