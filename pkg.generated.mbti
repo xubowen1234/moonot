@@ -12,6 +12,8 @@ pub fn balanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Arr
 
 pub fn coupling_barycentric_projection(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], CouplingProjectionError]
 
+pub fn coupling_compose(Array[Array[Double]], Array[Array[Double]], Double) -> Result[Array[Array[Double]], CouplingCompositionError]
+
 pub fn coupling_entropy(Array[Array[Double]]) -> Result[Double, CouplingInformationError]
 
 pub fn coupling_kl(Array[Array[Double]], Array[Array[Double]]) -> Result[Double, CouplingInformationError]
@@ -91,6 +93,17 @@ pub(all) struct BarycenterResult {
 pub(all) enum BarycenterTermination {
   Converged
   IterationLimit
+}
+
+pub(all) enum CouplingCompositionError {
+  InvalidTolerance
+  InvalidLeft(CouplingError)
+  InvalidRight(CouplingError)
+  BridgeDimensionMismatch(Int, Int)
+  BridgeMassMismatch(Int, Double, Double)
+  UndefinedBridgeConditional(Int)
+  NumericalOverflow(Int, Int, Int)
+  InvalidOutput(CouplingError)
 }
 
 pub(all) enum CouplingError {
