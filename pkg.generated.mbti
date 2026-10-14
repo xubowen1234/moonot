@@ -4,6 +4,8 @@ package "xubowen1234/moonot"
 // Values
 pub fn balanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornResult, SinkhornError]
 
+pub fn balanced_sinkhorn_continuation(Array[Double], Array[Double], Array[Array[Double]], Array[SinkhornOptions], SinkhornWarmStart?) -> Result[SinkhornContinuationResult, SinkhornContinuationError]
+
 pub fn balanced_sinkhorn_divergence(Array[Double], Array[Double], Array[Array[Double]], Array[Array[Double]], Array[Array[Double]], SinkhornOptions) -> Result[SinkhornDivergenceResult, SinkhornDivergenceError]
 
 pub fn balanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Array[Double]], SinkhornOptions, SinkhornWarmStart?) -> Result[(SinkhornResult, SinkhornWarmStart), SinkhornError]
@@ -120,6 +122,33 @@ pub(all) enum PointCostError {
   NonFiniteSourceCoordinate(Int, Int)
   NonFiniteTargetCoordinate(Int, Int)
   NumericalOverflow(Int, Int)
+}
+
+pub(all) enum SinkhornContinuationError {
+  EmptySchedule
+  InvalidEpsilon(Int)
+  NonDecreasingEpsilon(Int)
+  InvalidTolerance(Int)
+  InvalidIterationLimit(Int)
+  StageFailed(Int, SinkhornError, SinkhornContinuationProgress)
+}
+
+pub(all) struct SinkhornContinuationProgress {
+  stages : Array[SinkhornContinuationStage]
+  total_iterations : Int64
+  last_seed : SinkhornWarmStart?
+}
+
+pub(all) struct SinkhornContinuationResult {
+  stages : Array[SinkhornContinuationStage]
+  total_iterations : Int64
+  last_seed : SinkhornWarmStart
+  termination : SinkhornTermination
+}
+
+pub(all) struct SinkhornContinuationStage {
+  options : SinkhornOptions
+  result : SinkhornResult
 }
 
 pub(all) enum SinkhornDivergenceError {
