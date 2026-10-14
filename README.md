@@ -9,7 +9,7 @@ MoonOT 是纯 MoonBit 实现的有限离散分布最优传输库，提供平衡�
 MoonCakes 模块为 `xubowen1234/moonot`。在使用方项目中添加依赖：
 
 ```sh
-moon add xubowen1234/moonot@0.1.1
+moon add xubowen1234/moonot@0.1.2
 ```
 
 在使用方的 `moon.pkg` 中声明包导入：
@@ -30,9 +30,13 @@ let result = @moonot.balanced_sinkhorn(
   { epsilon: 0.25, tolerance: 1.0e-9, max_iterations: 1000 },
 )
 match result {
-  Err(error) => println(error)
+  Err(_) => println("传输求解失败")
   Ok(solution) => {
-    println(solution.coupling)
+    for row in solution.coupling {
+      for value in row {
+        println(value)
+      }
+    }
     println(solution.transport_cost)
     println(solution.entropy_regularizer)
     println(solution.regularized_objective)
@@ -98,7 +102,11 @@ match @moonot.regularized_barycenter_with_costs(
   { epsilon: 1.0, tolerance: 1.0e-10, max_iterations: 2000 },
 ) {
   Err(_) => println("输入分布、代价矩阵或求解配置无效")
-  Ok(solution) => println(solution.barycenter)
+  Ok(solution) => {
+    for value in solution.barycenter {
+      println(value)
+    }
+  }
 }
 ```
 
@@ -168,6 +176,7 @@ moon test --deny-warn --target wasm
 moon run --target wasm cmd/main
 python3 -m unittest discover -s scripts -p test_audit_project.py
 python3 scripts/audit_project.py --require-delivery
+python3 scripts/verify_readme.py --target wasm
 ```
 
 CI 检查格式、生成接口、源码规模及人工审阅历史，并对 wasm-gc、wasm、JavaScript、native 执行严格检查、构建、测试与全部示例。仅有配置不代表 CI 已通过，以 [实际运行记录](https://github.com/xubowen1234/moonot/actions) 为准。本机缺少 C 工具链时不声称 native 本地构建或测试成功，由真实 CI 验证。

@@ -2,6 +2,10 @@
 
 All notable user-visible changes to MoonOT will be recorded here. Entries describe repository capabilities and do not imply publication.
 
+## 0.1.2 — 2026-10-14
+
+- 修正 README 示例的错误与数组输出，使其通过严格编译；增加文档代码示例的自动校验，算法与公共 API 不变。
+
 ## 0.1.1 — 2026-10-14
 
 - 将主 README 与包简介改为中文，补齐安装说明、全部可运行示例和数值边界；公共 API 与算法实现未改变。
