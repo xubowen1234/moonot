@@ -71,6 +71,43 @@ fn point_cost_matrix(
   source_points : Array[Array[Double]],
   target_points : Array[Array[Double]],
 ) -> Result[Array[Array[Double]], PointCostError] {
+  let source_dimension = match
+    validate_point_supports(source_points, target_points) {
+    Err(error) => return Err(error)
+    Ok(dimension) => dimension
+  }
+
+  let costs : Array[Array[Double]] = []
+  for i in 0..<source_points.length() {
+    let row = Array::make(target_points.length(), 0.0)
+    for j in 0..<target_points.length() {
+      let mut value = 0.0
+      for d in 0..<source_dimension {
+        let delta = abs(source_points[i][d] - target_points[j][d])
+        if !is_finite(delta) {
+          return Err(PointCostError::NumericalOverflow(i, j))
+        }
+        match metric {
+          PointCostMetric::Manhattan => value = value + delta
+          PointCostMetric::Euclidean => value = @math.hypot(value, delta)
+          PointCostMetric::SquaredEuclidean => value = value + delta * delta
+        }
+        if !is_finite(value) {
+          return Err(PointCostError::NumericalOverflow(i, j))
+        }
+      }
+      row[j] = value
+    }
+    costs.push(row)
+  }
+  Ok(costs)
+}
+
+///|
+fn validate_point_supports(
+  source_points : Array[Array[Double]],
+  target_points : Array[Array[Double]],
+) -> Result[Int, PointCostError] {
   if source_points.length() == 0 {
     return Err(PointCostError::EmptySourceSupport)
   }
@@ -125,28 +162,5 @@ fn point_cost_matrix(
     )
   }
 
-  let costs : Array[Array[Double]] = []
-  for i in 0..<source_points.length() {
-    let row = Array::make(target_points.length(), 0.0)
-    for j in 0..<target_points.length() {
-      let mut value = 0.0
-      for d in 0..<source_dimension {
-        let delta = abs(source_points[i][d] - target_points[j][d])
-        if !is_finite(delta) {
-          return Err(PointCostError::NumericalOverflow(i, j))
-        }
-        match metric {
-          PointCostMetric::Manhattan => value = value + delta
-          PointCostMetric::Euclidean => value = @math.hypot(value, delta)
-          PointCostMetric::SquaredEuclidean => value = value + delta * delta
-        }
-        if !is_finite(value) {
-          return Err(PointCostError::NumericalOverflow(i, j))
-        }
-      }
-      row[j] = value
-    }
-    costs.push(row)
-  }
-  Ok(costs)
+  Ok(source_dimension)
 }

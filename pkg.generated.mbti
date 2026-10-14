@@ -28,6 +28,8 @@ pub fn unbalanced_sinkhorn(Array[Double], Array[Double], Array[Array[Double]], U
 
 pub fn unbalanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Array[Double]], UnbalancedSinkhornOptions, UnbalancedSinkhornWarmStart?) -> Result[(UnbalancedSinkhornResult, UnbalancedSinkhornWarmStart), UnbalancedSinkhornWarmStartError]
 
+pub fn weighted_squared_euclidean_cost_matrix(Array[Array[Double]], Array[Array[Double]], Array[Double]) -> Result[Array[Array[Double]], WeightedPointCostError]
+
 // Errors
 
 // Types and methods
@@ -245,6 +247,14 @@ pub struct UnbalancedSinkhornWarmStart {
 pub(all) enum UnbalancedSinkhornWarmStartError {
   SolverError(UnbalancedSinkhornError)
   InvalidWarmStart
+}
+
+pub(all) enum WeightedPointCostError {
+  InvalidPoints(PointCostError)
+  WeightDimensionMismatch
+  NonFiniteWeight(Int)
+  NegativeWeight(Int)
+  NumericalOverflow(Int, Int)
 }
 
 // Type aliases
