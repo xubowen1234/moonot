@@ -19,11 +19,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 line
+        with:
+          fetch-depth: 0
       - name: Set up MoonBit
         uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76 # reviewed 2026-10-13
         with:
           version: 0.1.20260920
           setup-core: true
+          core-version: 0.10.14+7d59c7ec9
+      - name: Audit source inventory and reviewed history
+        run: |
+          python3 -m unittest discover -s scripts -p test_audit_project.py
+          python3 scripts/audit_project.py --require-delivery
       - name: Check formatting
         run: moon fmt --check
       - name: Check generated public interfaces
@@ -42,11 +49,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 line
+        with:
+          fetch-depth: 0
       - name: Set up MoonBit
         uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76 # reviewed 2026-10-13
         with:
           version: 0.1.20260920
           setup-core: true
+          core-version: 0.10.14+7d59c7ec9
       - name: Check (${{ matrix.target }})
         run: moon check --deny-warn --target ${{ matrix.target }}
       - name: Build (${{ matrix.target }})
@@ -65,3 +75,25 @@ jobs:
           moon run --target ${{ matrix.target }} examples/point-cloud-transport
           moon run --target ${{ matrix.target }} examples/epsilon-scaling
           moon run --target ${{ matrix.target }} examples/unbalanced-continuation
+          moon run --target ${{ matrix.target }} examples/alignment-pipeline
+
+  independent-reference:
+    needs: formatting-and-interface
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Set up pinned MoonBit
+        uses: hustcer/setup-moonbit@87e2bdf5cf20d3b6f5c5f266a8a513f503bb5b76
+        with:
+          version: 0.1.20260920
+          setup-core: true
+          core-version: 0.10.14+7d59c7ec9
+      - name: Compare public APIs with pinned POT
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/moonot-reference"
+          "$RUNNER_TEMP/moonot-reference/bin/python" -m pip install --only-binary=:all: -r scripts/requirements-reference.txt
+          "$RUNNER_TEMP/moonot-reference/bin/python" scripts/verify_pot.py --target wasm --report "$RUNNER_TEMP/moonot-reference-report.json"
