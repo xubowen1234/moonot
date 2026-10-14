@@ -2,7 +2,7 @@
 
 MoonOT is a pure MoonBit library for regularized discrete optimal transport on finite supports. It provides balanced and KL-unbalanced log-domain Sinkhorn solvers, a debiased Sinkhorn divergence, and a fixed-support regularized barycenter. The numerical scope is independent and bounded, informed by the mathematical conventions of [Python Optimal Transport (POT)](https://github.com/PythonOT/POT); MoonOT is not a full POT port and does not copy upstream implementation code.
 
-> **Development status:** pre-release and under active development. Balanced and KL-unbalanced transport, Sinkhorn divergence, and fixed-support regularized barycenters are implemented with explicit objective conventions, structured validation/numerical errors, and iteration diagnostics. This pre-release README makes no measured performance or external compatibility claim; native test execution and a public release are not claimed.
+> **Scope:** finite-support, dense CPU calculations with explicit failure and iteration-limit results. Public delivery evidence is recorded in `docs/competition/delivery-audit.md`; a residual or convergence flag is not an unregularized optimality certificate.
 
 ## Current capability
 
@@ -102,6 +102,17 @@ match result {
 }
 ```
 
+## Coupling utilities and continuation
+
+- `weighted_squared_euclidean_cost_matrix`: diagonal feature weights, including zero weights; every coordinate must remain finite.
+- `balanced_sinkhorn_continuation`: prevalidated strictly decreasing epsilon schedule, independent stage budgets, recorded progress and opaque seeds.
+- `coupling_transpose` and `coupling_permute`: fresh validated plans and complete output-to-input index permutations.
+- `coupling_entropy` and `coupling_kl`: entropy `sum p(log p-1)` and generalized KL on non-normalized plans, with explicit zero-reference errors.
+- `round_balanced_coupling`: row/column clipping and deficit repair; reports actual marginal feasibility, not optimality.
+- `coupling_compose`: Markov gluing on compatible bridge marginals; not a direct optimal-transport solve.
+
+Contracts and examples: [feature costs](docs/weighted-costs.md), [continuation](docs/continuation.md), [orientation](docs/orientation.md), [information](docs/information.md), [rounding](docs/rounding.md), [composition](docs/composition.md), and [multi-domain workflow](docs/alignment-pipeline.md). Exact file names and public signatures are listed in `pkg.generated.mbti`.
+
 ## Balanced warm starts
 
 For a sequence of related balanced problems, retain the opaque dual-potential seed from one solve and pass it to the next. The seed is expressed in cost units and may be reused at another epsilon; the new solve still applies its own tolerance and iteration limit. Warm starts can reduce iterations for nearby problems, but do not guarantee a speedup for every input:
@@ -182,5 +193,3 @@ See `THIRD_PARTY_NOTICES.md` for upstream provenance and license boundaries, `AI
 ## License
 
 Apache-2.0. See [`LICENSE`](LICENSE).
-
-

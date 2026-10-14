@@ -6,4 +6,4 @@ MoonOT's algorithm selection and numerical test design reference the public API 
 
 MoonOT is an independent MoonBit implementation of a deliberately limited algorithmic subset. No POT source code, generated code, fixtures, or data tables are included. See [the duplicate-check record](docs/competition/duplicate-check.md) for the exact inspected scope and exclusions. This notice is attribution and provenance, not a claim of full POT compatibility.
 
-MoonOT currently has no runtime or development library dependencies beyond the MoonBit toolchain and standard library.
+MoonOT has no runtime library dependencies beyond the MoonBit standard library. The optional independent reference harness installs POT, NumPy (BSD-3-Clause), and SciPy (BSD-3-Clause) in a separate Python environment; these are not distributed in the MoonCakes package. Dependency versions and actual measurements are documented in `docs/reference-validation.md`. Authored analytic test inputs and synthetic examples are Apache-2.0; no upstream fixtures were copied.

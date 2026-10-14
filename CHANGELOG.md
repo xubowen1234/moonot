@@ -2,7 +2,11 @@
 
 All notable user-visible changes to MoonOT will be recorded here. Entries describe repository capabilities and do not imply publication.
 
-## Unreleased
+## 0.1.0 — 2026-10-14
+
+- Added feature-weighted ground costs, bounded epsilon schedules, coupling orientation, entropy/generalized KL, balanced feasibility rounding, and Markov composition with typed validation failures.
+- Added an assertion-bearing three-domain alignment workflow and independently reproducible analytic/POT reference validation.
+- Added audited source/history gates and pinned multi-target CI.
 
 - Added opt-in KL-unbalanced Sinkhorn continuation with a distinct opaque seed/error API, checked epsilon migration, per-call diagnostics, and a runnable changed-input example; no speedup is guaranteed.
 - Added `regularized_barycenter_with_costs` for fixed-support balanced barycenters with one validated square ground-cost matrix per measure, with per-matrix log-domain kernels and original-cost objective evaluation; the shared-cost API remains unchanged.

@@ -1,0 +1,344 @@
+{
+  "method": "Manual diff/value review; metadata-only and later delivery bookkeeping excluded. Historical author correction is not an engineering contribution. Tests cited are current regression evidence, not a claim of re-running every historical checkout.",
+  "commits": [
+    {
+      "sha": "f280f59f96172232117d0088ddbbce50fe9e94b9",
+      "subject": "feat: implement MoonOT transport solver foundation",
+      "valid": true,
+      "purpose": "Implement the balanced/KL-unbalanced solvers, divergence and fixed-support barycenter with analytic/error-path tests and runnable downstream consumers.",
+      "paths": [
+        ".githooks/README.md",
+        ".githooks/pre-commit",
+        ".github/workflows/ci.yml",
+        ".github/workflows/copilot-setup-steps.yml",
+        ".gitignore",
+        "AGENTS.md",
+        "AI_USAGE.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "README.mbt.md",
+        "README.md",
+        "THIRD_PARTY_NOTICES.md",
+        "barycenter.mbt",
+        "barycenter_test.mbt",
+        "barycenter_wbtest.mbt",
+        "cmd/main/main.mbt",
+        "cmd/main/moon.pkg",
+        "cmd/main/pkg.generated.mbti",
+        "divergence.mbt",
+        "divergence_test.mbt",
+        "divergence_wbtest.mbt",
+        "docs/algorithm-contract.md",
+        "docs/algorithm-derivation.md",
+        "docs/competition/duplicate-check.md",
+        "examples/color-histogram/main.mbt",
+        "examples/color-histogram/moon.pkg",
+        "examples/color-histogram/pkg.generated.mbti",
+        "examples/divisible-allocation/main.mbt",
+        "examples/divisible-allocation/moon.pkg",
+        "examples/divisible-allocation/pkg.generated.mbti",
+        "examples/fixed-support-barycenter/main.mbt",
+        "examples/fixed-support-barycenter/moon.pkg",
+        "examples/fixed-support-barycenter/pkg.generated.mbti",
+        "examples/ml-reweight/main.mbt",
+        "examples/ml-reweight/moon.pkg",
+        "examples/ml-reweight/pkg.generated.mbti",
+        "examples/unbalanced-observations/main.mbt",
+        "examples/unbalanced-observations/moon.pkg",
+        "examples/unbalanced-observations/pkg.generated.mbti",
+        "moon.mod",
+        "moon.pkg",
+        "moonot.mbt",
+        "moonot_test.mbt",
+        "moonot_wbtest.mbt",
+        "pkg.generated.mbti",
+        "unbalanced.mbt",
+        "unbalanced_test.mbt",
+        "unbalanced_wbtest.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "b51a13f7de1e864fe5ac963b25621f620565158d",
+      "subject": "chore: describe MoonOT for package discovery",
+      "valid": false,
+      "purpose": "Metadata-only package discovery description; excluded from engineering count.",
+      "paths": [
+        "moon.mod"
+      ],
+      "verification": "Metadata inspection only; excluded."
+    },
+    {
+      "sha": "5c3b8f32eb38f6424ae6b10d8ffdb14a5330ba25",
+      "subject": "feat: add validated point-cloud cost metrics",
+      "valid": true,
+      "purpose": "Validate rectangular finite point supports and compute three ground metrics with typed numeric errors.",
+      "paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "costs.mbt",
+        "costs_test.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "5fcfe920da42c53392fde5c830db7ffb9db50cc0",
+      "subject": "feat: demonstrate point-cloud transport end to end",
+      "valid": true,
+      "purpose": "Integrate coordinate-derived costs into a runnable complete transport consumer.",
+      "paths": [
+        ".github/workflows/ci.yml",
+        "CHANGELOG.md",
+        "README.md",
+        "examples/point-cloud-transport/main.mbt",
+        "examples/point-cloud-transport/moon.pkg",
+        "examples/point-cloud-transport/pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "f7eb5f061a2e3bee12158795e1249aac59e0af87",
+      "subject": "feat: add validated coupling diagnostics",
+      "valid": true,
+      "purpose": "Expose checked coupling marginals and transport cost instead of requiring every caller to reimplement validation.",
+      "paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "coupling.mbt",
+        "coupling_test.mbt",
+        "docs/algorithm-contract.md",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "8e1b05a372390b4ef021663b6ad2341a99feb0b7",
+      "subject": "feat: add stable coupling barycentric projection",
+      "valid": true,
+      "purpose": "Map source support conditionals into target features using a stable barycentric projection.",
+      "paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/algorithm-contract.md",
+        "examples/point-cloud-transport/main.mbt",
+        "pkg.generated.mbti",
+        "projection.mbt",
+        "projection_test.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "45a17ae183e85b67df2a04b3d0795191bd1a3d29",
+      "subject": "feat: expose balanced objective components",
+      "valid": true,
+      "purpose": "Expose objective components and independently assert objective accounting.",
+      "paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/algorithm-contract.md",
+        "moonot.mbt",
+        "moonot_test.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "f7b9370cab3ef6e4455f9a47384fb830f91a199a",
+      "subject": "feat: add balanced Sinkhorn warm starts",
+      "valid": true,
+      "purpose": "Reuse opaque cost-unit balanced seeds across related problems and epsilon changes.",
+      "paths": [
+        ".github/workflows/ci.yml",
+        "CHANGELOG.md",
+        "README.md",
+        "cmd/main/main.mbt",
+        "docs/algorithm-contract.md",
+        "examples/epsilon-scaling/main.mbt",
+        "examples/epsilon-scaling/moon.pkg",
+        "examples/epsilon-scaling/pkg.generated.mbti",
+        "moonot.mbt",
+        "moonot_test.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "7869f4d1df0dcbca0bfdb59f29b2c2079d2a832b",
+      "subject": "feat: support heterogeneous barycenter costs",
+      "valid": true,
+      "purpose": "Support independently calibrated per-measure barycenter geometries instead of a shared averaged cost.",
+      "paths": [
+        "CHANGELOG.md",
+        "README.md",
+        "barycenter.mbt",
+        "barycenter_costs_test.mbt",
+        "barycenter_wbtest.mbt",
+        "docs/algorithm-contract.md",
+        "docs/competition/duplicate-check.md",
+        "examples/fixed-support-barycenter/main.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "715fea44756a207138fe1167f23babbd31399e62",
+      "subject": "feat: add KL-unbalanced Sinkhorn warm starts",
+      "valid": true,
+      "purpose": "Provide KL-unbalanced opaque warm starts with checked epsilon conversion and changed-input consumer.",
+      "paths": [
+        ".github/workflows/ci.yml",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/algorithm-contract.md",
+        "examples/unbalanced-continuation/main.mbt",
+        "examples/unbalanced-continuation/moon.pkg",
+        "examples/unbalanced-continuation/pkg.generated.mbti",
+        "pkg.generated.mbti",
+        "unbalanced.mbt",
+        "unbalanced_warm_start_test.mbt",
+        "unbalanced_wbtest.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "1e280a68ecaf8a76ed37ccbf2d34dee5a56e1672",
+      "subject": "fix: ignore dormant warm-start potentials",
+      "valid": true,
+      "purpose": "Prevent inactive support/zero-penalty warm potentials from producing spurious failures, with regression tests.",
+      "paths": [
+        "unbalanced.mbt",
+        "unbalanced_wbtest.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "fb09f1d470ccb78fbbbec1d34c854d629cd078b7",
+      "subject": "feat: support feature-weighted point-cloud ground costs",
+      "valid": true,
+      "purpose": "Introduce feature-weighted ground costs with zero-weight and extreme-scale contracts.",
+      "paths": [
+        "costs.mbt",
+        "docs/weighted-costs.md",
+        "pkg.generated.mbti",
+        "weighted_costs.mbt",
+        "weighted_costs_test.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "8b388e461cce1cc3bbcc0927de1aaa3b7b4df893",
+      "subject": "feat: add bounded balanced epsilon continuation",
+      "valid": true,
+      "purpose": "Validate and execute bounded decreasing-epsilon schedules with stage-specific progress/error reporting.",
+      "paths": [
+        "continuation.mbt",
+        "continuation_test.mbt",
+        "docs/continuation.md",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "9987d121af711fe4377ab3ec2c95bc7441fa01db",
+      "subject": "feat: add validated coupling orientation and reindexing",
+      "valid": true,
+      "purpose": "Transpose and reindex validated couplings with complete permutation and immutability guarantees.",
+      "paths": [
+        "docs/orientation.md",
+        "orientation.mbt",
+        "orientation_test.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "804b83b774935c8dd93d2a4146d6f7d006c10954",
+      "subject": "feat: expose stable coupling entropy and generalized KL",
+      "valid": true,
+      "purpose": "Compute entropy and generalized KL with stable near-equality arithmetic and zero-reference contracts.",
+      "paths": [
+        "docs/information.md",
+        "information.mbt",
+        "information_test.mbt",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "087a2ab66afedac1ee47bd937d6180abb472b476",
+      "subject": "feat: round dense plans to validated balanced marginals",
+      "valid": true,
+      "purpose": "Repair balanced feasibility by ordered clipping and rank-one deficits, checking the actual returned residual.",
+      "paths": [
+        "docs/rounding.md",
+        "pkg.generated.mbti",
+        "rounding.mbt",
+        "rounding_test.mbt"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "c74a412ca7f3a989f64dd84ea8e698e476f3a034",
+      "subject": "feat: compose coupling conditionals across bridge supports",
+      "valid": true,
+      "purpose": "Glue conditional plans across a mass-compatible bridge with explicit approximate-match limits.",
+      "paths": [
+        "composition.mbt",
+        "composition_test.mbt",
+        "docs/composition.md",
+        "pkg.generated.mbti"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "673e947454e6e9412cc590bed94d36f348185be7",
+      "subject": "example: validate a multi-domain alignment pipeline",
+      "valid": true,
+      "purpose": "Demonstrate a complete three-domain alignment pipeline with convergence, marginal and convex-hull assertions.",
+      "paths": [
+        "docs/alignment-pipeline.md",
+        "examples/alignment-pipeline/main.mbt",
+        "examples/alignment-pipeline/moon.pkg"
+      ],
+      "verification": "Relevant tests are present in the listed diff; complete current suite passed on wasm-gc, wasm and js on 2026-10-14. Consumers ran on all three targets; native check passed, native execution deferred to CI."
+    },
+    {
+      "sha": "a01d17e873f682b8660fde3e32e763826c0b7637",
+      "subject": "test: compare transport plans and objectives with pinned POT",
+      "valid": true,
+      "purpose": "Compare independently implemented POT plans and objective conventions plus analytic zero-support boundaries.",
+      "paths": [
+        "docs/reference-validation.md",
+        "reference_vectors_test.mbt",
+        "scripts/requirements-reference.txt",
+        "scripts/verify_pot.py"
+      ],
+      "verification": "Pinned POT harness: 60/60 cases (56 POT and 4 analytic), 28 entropy/KL cross-checks; 9 analytic MoonBit tests."
+    },
+    {
+      "sha": "dfeb916fe72dcb8a4c6e2c3db78a0b6d4a7ec892",
+      "subject": "test: verify transport objective metamorphic invariants",
+      "valid": true,
+      "purpose": "Assert objective-derived scaling, permutation and cost-shift relations, including differences between balanced and KL formulations.",
+      "paths": [
+        "transport_metamorphic_test.mbt"
+      ],
+      "verification": "Focused metamorphic tests 9/9 on wasm-gc, wasm and js; convergence and objective relations asserted."
+    },
+    {
+      "sha": "809456f4ad0a91bde4379eb091e4beba39a84b21",
+      "subject": "ci: enforce reproducible multi-target and meaningful-history gates",
+      "valid": true,
+      "purpose": "Pin toolchain/core, run full target/consumer/reference matrix and enforce tested source/history audit gates.",
+      "paths": [
+        ".github/workflows/ci.yml",
+        ".gitignore",
+        "docs/engineering-audit.md",
+        "scripts/audit_project.py",
+        "scripts/test_audit_project.py"
+      ],
+      "verification": "Audit unit tests 3/3; pinned core archive available; actual clean-runner CI still required before release."
+    }
+  ]
+}
