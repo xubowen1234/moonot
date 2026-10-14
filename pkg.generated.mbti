@@ -12,6 +12,10 @@ pub fn balanced_sinkhorn_with_warm_start(Array[Double], Array[Double], Array[Arr
 
 pub fn coupling_barycentric_projection(Array[Array[Double]], Array[Array[Double]]) -> Result[Array[Array[Double]], CouplingProjectionError]
 
+pub fn coupling_entropy(Array[Array[Double]]) -> Result[Double, CouplingInformationError]
+
+pub fn coupling_kl(Array[Array[Double]], Array[Array[Double]]) -> Result[Double, CouplingInformationError]
+
 pub fn coupling_marginals(Array[Array[Double]]) -> Result[CouplingMarginals, CouplingError]
 
 pub fn coupling_permute(Array[Array[Double]], Array[Int], Array[Int]) -> Result[Array[Array[Double]], CouplingOrientationError]
@@ -97,6 +101,15 @@ pub(all) enum CouplingError {
   CostColumnCountMismatch(Int)
   NonFiniteCost(Int, Int)
   NegativeCost(Int, Int)
+  NumericalOverflow(Int, Int)
+}
+
+pub(all) enum CouplingInformationError {
+  InvalidCoupling(CouplingError)
+  InvalidReference(CouplingError)
+  RowCountMismatch(Int, Int)
+  ColumnCountMismatch(Int, Int)
+  ZeroReferenceSupport(Int, Int)
   NumericalOverflow(Int, Int)
 }
 
