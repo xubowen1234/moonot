@@ -54,3 +54,23 @@ The heterogeneous path has an asymmetric analytic Dirac case with an independent
 Repeated MoonCakes CLI searches with limit 100 for Sinkhorn, Wasserstein, optimal transport, barycenter and coupling, plus account-bound GitHub MoonBit repository searches for solver and API concepts. The original `moon_diffusion_lab` and `moonopt` remain adjacent rather than direct solver substitutes. Barycenter hits additionally described graph-layout ordering heuristics, barycentric coordinates/interpolation and physical-measurement interpolation (`Milky2018/diago`, `bobzhang/elk`, `Milky2018/moon_elk`, `wjyupl/measure`, `bobzhang/games`, `zhaoyuanjuns/moonbit_extractor`); the returned API summaries do not describe measure-to-measure entropy-regularized transport. Coupling hits described parasitic RC, filesystem and hydrology coupling. These are semantic false positives, not proof of exhaustiveness. The four GitHub repository queries returned no results; code outside indexed repository descriptions may be missed. Previous README/API/source/test comparisons and their archive-access limitation still apply. New weighted costs, feasibility repair and Markov gluing remain within the reserved finite-support transport fingerprint.
 
 **Conclusion:** 在已记录检索范围内未发现成熟直接替代。
+
+## 修复交付前语义复核 — 2026-10-20
+
+本节是对既有选题与原有三个不同问题域候选记录的补充，不覆盖早期查重或阶段性测试结论。再次执行无凭据 MoonCakes CLI 检索（每词上限 100，覆盖 Sinkhorn、Wasserstein、optimal transport、barycenter、coupling），并通过指定账号只读查询 GitHub MoonBit 仓库。仓库描述检索零命中并不证明源码中没有实现；搜索索引、未收录和私有项目仍构成覆盖限制。
+
+本次重新检查当前永久注册表相关完整指纹和以下固定官方发布归档的 README、公开接口、实现及测试。相邻测试仅做静态审阅，未宣称运行。此前 MoonDiffusionLab 归档不可访问的局限已由本次精确版本源码读取补足；历史记录仍保留。
+
+| 固定相邻版本 | 实际核心与重叠 | 与 MoonOT 的功能边界 |
+|---|---|---|
+| [Freon793/moonopt@0.3.0](https://mooncakes.io/docs/Freon793/moonopt) | LP/MIP、预求解、revised simplex；运输 LP 示例与传统平衡运输存在真实交集。较 0.2.0 增加 LP 松弛、Devex 定价和强化等。 | 模型/证书/运输示例与相关源码测试复核未见增加熵正则 Sinkhorn、KL 非平衡耦合、去偏散度或固定支持 OT 重心。不是仅因算法名不同判为不重复。 |
+| [hxiuzheng/moon_diffusion_lab@0.1.6](https://mooncakes.io/docs/hxiuzheng/moon_diffusion_lab) | `core/stats.mbt` 的 `sliced_wasserstein_approx` 是二维样本两轴排序的近似标量指标，测试覆盖相同及平移样本。 | 不接收任意代价与源/目标质量模型，不输出稠密耦合、KL 目标组成、边际残差或 OT 重心。 |
+| [walkzzz/moon-geometry@0.231.0](https://mooncakes.io/docs/walkzzz/moon-geometry) | `src/emd` 与根 reexport 确有一维 EMD/均匀或权重距离接口，不能把它说成没有最优传输功能。 | 一维标量距离与 MoonOT 的任意有限矩形代价、稠密正则耦合及派生组合有局部领域交集，但输入、输出、目标和主要任务不同。 |
+
+本次归档 SHA-256 依次为 `431a83e4ed5a28885bb37459dbb8b539ca4270912d9c4dc7fc04fc659a014485`、`e3a0d542610466f1ac4accfb3c27b299c459cbf1323915a1e71245fd157ab9cc`、`258ac806a532c8062f06f15ba09b78fe1f65b8b108fb6a301c04f3f5909cae01`。逐文件摘要及关键源码行号保留在仓库外验收证据中，不上传私人报告。
+
+永久注册表当前快照 SHA-256 为 `fcd2fb7c6ac490a6bc23bd36c9fad4a511d85e1406981fdc62dc0ec6a5d73f76`。MoonOT 自身 reserved/completed/README 同步记录为同一项目历史；对 MoonQP、MoonChoice、MoonCutStock、MoonIsotonic、MoonDOE、MoonBelief、MoonMultigrid、MoonKinetics 等保留指纹按真实目标、数据模型及工作流比较，不因共有“质量、分布、矩阵、分配”等词就认定等价，也不复用其它 reserved/completed 项目。
+
+现有数据对齐、颜色直方图、可分资源配置三类完整示例继续使用同一公共 API；本轮只修复已复现的数值边界，不扩展产品方向。native 本地仍只有严格检查证据，修复提交的真实 CI 必须另行核验，不能借用旧 CI。
+
+**查重结论：在已记录检索范围内未发现成熟直接替代。**

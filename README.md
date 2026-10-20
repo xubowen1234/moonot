@@ -9,7 +9,7 @@ MoonOT 是纯 MoonBit 实现的有限离散分布最优传输库，提供平衡�
 MoonCakes 模块为 `xubowen1234/moonot`。在使用方项目中添加依赖：
 
 ```sh
-moon add xubowen1234/moonot@0.1.2
+moon add xubowen1234/moonot@0.1.3
 ```
 
 在使用方的 `moon.pkg` 中声明包导入：

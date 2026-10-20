@@ -2,6 +2,13 @@
 
 All notable user-visible changes to MoonOT will be recorded here. Entries describe repository capabilities and do not imply publication.
 
+## 0.1.3 — 2026-10-20
+
+- 修复条件重心投影在零权重大坐标上的伪溢出，以及极端指数条件权重先下溢造成的可表示结果丢失。
+- 修复 Markov 耦合拼接的中间比值下溢，并延迟恢复最终二进制指数，保留多个次正规桥接项合计后可表示的质量。
+- 修复 KL 非平衡传输费用计算中三个因子连乘的次正规前缀舍入偏差；公共 API 与依赖不变。
+- 增加极端指数、最小次正规数、符号、矩形输出和输入不变性回归；独立验证方法与适用边界见算法契约。
+
 ## 0.1.2 — 2026-10-14
 
 - 修正 README 示例的错误与数组输出，使其通过严格编译；增加文档代码示例的自动校验，算法与公共 API 不变。

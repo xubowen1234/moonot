@@ -61,35 +61,61 @@ pub fn coupling_barycentric_projection(
     }
     let projected = Array::make(dimensions, 0.0)
     for d in 0..<dimensions {
-      let mut scale = 0.0
+      let significands = Array::make(columns, 0.0)
+      let exponents = Array::make(columns, 0)
+      let mut maximum_exponent = -4096
+      let mut coordinate_bound = 0.0
       for j in 0..<columns {
-        if coupling[i][j] > 0.0 {
+        // Validate every coordinate above, but never perform arithmetic on
+        // a zero-mass contributor. In particular, 0 * infinity is not zero.
+        if coupling[i][j] > 0.0 && target_values[j][d] != 0.0 {
           let magnitude = abs(target_values[j][d])
-          if magnitude > scale {
-            scale = magnitude
+          if magnitude > coordinate_bound {
+            coordinate_bound = magnitude
+          }
+          let (significand, exponent) = product_quotient_parts(
+            coupling[i][j],
+            magnitude,
+            row_mass,
+          )
+          significands[j] = if target_values[j][d] < 0.0 {
+            -significand
+          } else {
+            significand
+          }
+          exponents[j] = exponent
+          if exponent > maximum_exponent {
+            maximum_exponent = exponent
           }
         }
       }
-      if scale > 0.0 {
-        let mut normalized_mean = 0.0
+      if coordinate_bound > 0.0 {
+        let mut total = 0.0
+        let mut correction = 0.0
         for j in 0..<columns {
-          let weight = coupling[i][j] / row_mass
-          let normalized_value = target_values[j][d] / scale
-          normalized_mean = normalized_mean + weight * normalized_value
-          if !is_finite(normalized_mean) {
-            return Err(CouplingProjectionError::NumericalOverflow(i, d))
+          if significands[j] != 0.0 {
+            let term = @math.scalbn(
+              significands[j],
+              exponents[j] - maximum_exponent,
+            )
+            let adjusted = term - correction
+            let next = total + adjusted
+            correction = next - total - adjusted
+            total = next
           }
         }
-        // A normalized convex combination is in [-1, 1]. Clamp only the
-        // rounding error at that known mathematical boundary.
-        let bounded_mean = if normalized_mean > 1.0 {
-          1.0
-        } else if normalized_mean < -1.0 {
-          -1.0
+        // Restore the exponent only after summation: a tiny conditional
+        // weight can still have a representable contribution at a large
+        // coordinate. The exact convex combination is within this bound;
+        // clamp only floating-point overshoot at that mathematical boundary.
+        let mean = @math.scalbn(total, maximum_exponent)
+        projected[d] = if mean > coordinate_bound {
+          coordinate_bound
+        } else if mean < -coordinate_bound {
+          -coordinate_bound
         } else {
-          normalized_mean
+          mean
         }
-        projected[d] = bounded_mean * scale
         if !is_finite(projected[d]) {
           return Err(CouplingProjectionError::NumericalOverflow(i, d))
         }

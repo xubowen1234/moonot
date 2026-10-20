@@ -866,21 +866,19 @@ fn unbalanced_product3(
   if first == 0.0 || second == 0.0 || third == 0.0 {
     return Ok(0.0)
   }
-  let direct = first * second * third
-  if is_finite(direct) && direct > 0.0 {
-    return Ok(direct)
-  }
-  let log_value = @math.ln(first) + @math.ln(second) + @math.ln(third)
-  if !is_finite(log_value) {
-    return Err(UnbalancedSinkhornError::NumericalFailure)
-  }
-  if log_value > 709.782712893384 {
-    return Err(UnbalancedSinkhornError::NumericalFailure)
-  }
-  if log_value < -744.4400719213812 {
-    return Ok(0.0)
-  }
-  let value = @math.exp(log_value)
+  // Defer binary exponent restoration until all three positive factors have
+  // been combined. A rounded subnormal prefix can otherwise bias a finite,
+  // normal objective term even when the direct result is nonzero.
+  let first_exponent = @math.log2(first).floor().to_int()
+  let second_exponent = @math.log2(second).floor().to_int()
+  let third_exponent = @math.log2(third).floor().to_int()
+  let significand = @math.scalbn(first, -first_exponent) *
+    @math.scalbn(second, -second_exponent) *
+    @math.scalbn(third, -third_exponent)
+  let value = @math.scalbn(
+    significand,
+    first_exponent + second_exponent + third_exponent,
+  )
   if !is_finite(value) {
     return Err(UnbalancedSinkhornError::NumericalFailure)
   }

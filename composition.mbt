@@ -73,21 +73,34 @@ pub fn coupling_compose(
     for k in 0..<targets {
       let mut total = 0.0
       let mut correction = 0.0
+      let mut common_exponent = -4096
       for j in 0..<bridges {
         // This also skips shared zero bridges without dividing by zero.
         if left[i][j] == 0.0 || right[j][k] == 0.0 {
           continue
         }
         // Every positive left mass has a positive right row after validation.
-        // Divide first: the conditional is in [0,1], whereas left*right
-        // could overflow even for a perfectly representable composition.
-        let conditional = right[j][k] / right_marginals.source[j]
-        let term = left[i][j] * conditional
+        // Combine binary exponents before materializing the product quotient.
+        // Neither left*right overflow nor an underflowing conditional may
+        // discard a representable output mass.
+        let (significand, exponent) = product_quotient_parts(
+          left[i][j],
+          right[j][k],
+          right_marginals.source[j],
+        )
+        // Keep terms scaled until the whole cell is accumulated. Several
+        // terms individually smaller than the minimum subnormal can still
+        // sum to a representable output; rounding each term first loses it.
+        if exponent > common_exponent {
+          total = @math.scalbn(total, common_exponent - exponent)
+          correction = @math.scalbn(correction, common_exponent - exponent)
+          common_exponent = exponent
+        }
+        let term = @math.scalbn(significand, exponent - common_exponent)
         let adjusted = term - correction
         let next = total + adjusted
         let remainder = next - total - adjusted
-        if !is_finite(conditional) ||
-          !is_finite(term) ||
+        if !is_finite(term) ||
           !is_finite(adjusted) ||
           !is_finite(next) ||
           !is_finite(remainder) {
@@ -96,7 +109,10 @@ pub fn coupling_compose(
         total = next
         correction = remainder
       }
-      row[k] = total
+      row[k] = @math.scalbn(total, common_exponent)
+      if !is_finite(row[k]) {
+        return Err(CouplingCompositionError::NumericalOverflow(i, 0, k))
+      }
     }
     composed.push(row)
   }
